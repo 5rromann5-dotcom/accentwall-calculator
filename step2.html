@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accent Wall — Step 2</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1 class="title">CHOOSE YOUR DESIGN</h1>
+
+    <div class="tiles-container">
+
+        <div class="tile" style="background-image: url('img/board_batten.jpg');"
+             onclick="selectDesign('Board & Batten')">
+            <div class="tile-label">Board & Batten</div>
+        </div>
+
+        <div class="tile" style="background-image: url('img/modern_geometric.jpg');"
+             onclick="selectDesign('Modern Geometric')">
+            <div class="tile-label">Modern Geometric</div>
+        </div>
+
+        <div class="tile" style="background-image: url('img/slat_shiplap.jpg');"
+             onclick="selectDesign('Slat / Shiplap')">
+            <div class="tile-label">Slat Wall / Shiplap</div>
+        </div>
+
+        <div class="tile" style="background-image: url('img/herringbone.jpg');"
+             onclick="selectDesign('Herringbone / Chevron')">
+            <div class="tile-label">Herringbone / Chevron</div>
+        </div>
+
+        <div class="tile" style="background-image: url('img/custom.jpg');"
+             onclick="selectCustom()">
+            <div class="tile-label">Custom Pattern</div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Bottom navigation -->
+<div class="bottom-bar">
+    <button class="nav-btn back-btn" onclick="goBack()">BACK</button>
+</div>
+
+<script>
+function selectDesign(design) {
+    localStorage.setItem("step2_design", design);
+    window.location.href = "step2_2.html";
+}
+
+function selectCustom() {
+    localStorage.setItem("step2_design", "CUSTOM");
+    window.location.href = "step7.html";
+}
+
+function goBack() {
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>

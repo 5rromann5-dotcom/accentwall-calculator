@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accent Wall — Step 3</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1 class="title">CHOOSE FINISHING</h1>
+
+    <div id="finishContainer"></div>
+
+</div>
+
+<!-- Bottom Navigation -->
+<div class="bottom-bar">
+    <button class="nav-btn back-btn" onclick="goBack()">BACK</button>
+    <button class="nav-btn next-btn" id="continueBtn" disabled>CONTINUE</button>
+</div>
+
+<!-- Tooltip image overlay -->
+<div id="tooltipOverlay" class="tooltip-image"></div>
+
+<script>
+let selectedFinish = null;
+
+// -----------------------------
+// FINISHING OPTIONS
+// -----------------------------
+const finishOptions = [
+    {
+        name: "One-color painting",
+        img: "finish_onecolor.jpg",
+        tip: "finish_onecolor_tip.jpg"
+    },
+    {
+        name: "Different colors for wall and boards",
+        img: "finish_multicolor.jpg",
+        tip: "finish_multicolor_tip.jpg"
+    },
+    {
+        name: "Some boards in different color",
+        img: "finish_partialcolor.jpg",
+        tip: "finish_partialcolor_tip.jpg"
+    },
+    {
+        name: "Solid wood boards + wall painting",
+        img: "finish_solidwood_paint.jpg",
+        tip: "finish_solidwood_paint_tip.jpg"
+    },
+    {
+        name: "Solid wood boards (no wall paint)",
+        img: "finish_solidwood_nowall.jpg",
+        tip: "finish_solidwood_nowall_tip.jpg"
+    }
+];
+
+// -----------------------------
+// BUILD UI
+// -----------------------------
+function loadFinishOptions() {
+    const container = document.getElementById("finishContainer");
+
+    finishOptions.forEach((opt, index) => {
+        const box = document.createElement("div");
+        box.className = "variant-box";
+        box.onclick = () => selectFinish(index);
+
+        box.innerHTML = `
+            <img src="img/${opt.img}">
+            <div class="variant-title">
+                ${opt.name}
+                <span class="tooltip-icon" onclick="event.stopPropagation(); showTip('${opt.tip}')">?</span>
+            </div>
+        `;
+
+        container.appendChild(box);
+    });
+}
+
+loadFinishOptions();
+
+// -----------------------------
+// SELECT FINISH
+// -----------------------------
+function selectFinish(i) {
+    selectedFinish = i;
+
+    document.querySelectorAll(".variant-box").forEach((el, idx) => {
+        el.classList.toggle("variant-selected", idx === i);
+    });
+
+    const btn = document.getElementById("continueBtn");
+    btn.disabled = false;
+    btn.style.opacity = "1";
+}
+
+// -----------------------------
+// SHOW TOOLTIP IMAGE
+// -----------------------------
+function showTip(imgName) {
+    const overlay = document.getElementById("tooltipOverlay");
+    overlay.innerHTML = `<img src="img/${imgName}">`;
+    overlay.classList.add("visible");
+    overlay.onclick = () => overlay.classList.remove("visible");
+}
+
+// -----------------------------
+// CONTINUE → Step 4
+// -----------------------------
+document.getElementById("continueBtn").onclick = () => {
+    const chosen = finishOptions[selectedFinish].name;
+    localStorage.setItem("step3_finish", chosen);
+
+    window.location.href = "step4.html";
+};
+
+// -----------------------------
+// BACK BUTTON
+// -----------------------------
+function goBack() {
+    window.location.href = "step2_2.html";
+}
+</script>
+
+</body>
+</html>

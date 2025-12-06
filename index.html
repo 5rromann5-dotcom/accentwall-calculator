@@ -1,24 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accent Wall Calculator</title>
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Accent Wall Calculator - Step 1</title>
+    <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-<div id="app">
-    <h1>Accent Wall Calculator</h1>
+<div class="container">
 
-    <div id="step-container"></div>
+    <h1 class="title">ENTER YOUR WALL DIMENSIONS</h1>
 
-    <div id="floating-footer">
-        <button id="backBtn" class="hidden">Back</button>
-        <button id="nextBtn">Next</button>
+    <div class="wall-preview">
+        <img src="img/1HW.png" class="wall-img" alt="Wall Preview" />
     </div>
+
+    <label class="label">
+        Wall Width (in feet)
+        <span class="tooltip-icon" onclick="showTooltip('widthTip')">?</span>
+    </label>
+    <input type="number" id="width" placeholder="Enter width" />
+
+    <div id="widthTip" class="tooltip-image">
+        <img src="img/width-tip.png">
+    </div>
+
+    <label class="label">
+        Wall Height (in feet)
+        <span class="tooltip-icon" onclick="showTooltip('heightTip')">?</span>
+    </label>
+    <input type="number" id="height" placeholder="Enter height" />
+
+    <div id="heightTip" class="tooltip-image">
+        <img src="img/height-tip.png">
+    </div>
+
+    <button id="continueBtn" class="continue-btn disabled" disabled>
+        CONTINUE
+    </button>
+
 </div>
 
-<script src="script.js"></script>
+<script>
+function showTooltip(id) {
+    document.getElementById(id).classList.toggle("visible");
+}
+
+function validate() {
+    const w = document.getElementById("width").value;
+    const h = document.getElementById("height").value;
+    const btn = document.getElementById("continueBtn");
+
+    if (w > 0 && h > 0) {
+        btn.classList.remove("disabled");
+        btn.disabled = false;
+    } else {
+        btn.classList.add("disabled");
+        btn.disabled = true;
+    }
+}
+
+document.getElementById("width").addEventListener("input", validate);
+document.getElementById("height").addEventListener("input", validate);
+
+document.getElementById("continueBtn").onclick = () => {
+    const data = {
+        width: document.getElementById("width").value,
+        height: document.getElementById("height").value
+    };
+
+    localStorage.setItem("step1", JSON.stringify(data));
+    window.location.href = "step2.html";
+};
+</script>
+
 </body>
 </html>

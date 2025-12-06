@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accent Wall — Step 6</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+
+    <h1 class="title">YOUR FINAL PRICE</h1>
+
+    <div id="finalPriceBlock" class="final-price">
+        Loading price...
+    </div>
+
+    <button id="showDateBtn" class="continue-btn">Show estimated installation date</button>
+
+    <div id="dateBlock" style="display:none; margin-top:20px; font-size:20px; font-weight:600;">
+        Estimated installation: <span id="dateValue"></span>
+    </div>
+
+    <button id="continueOrderBtn" class="continue-btn" style="margin-top:25px; display:none;">
+        Would you like to continue with your order?
+    </button>
+
+    <div id="emailBlock" style="display:none; margin-top:25px;">
+        <label class="label">Enter your email</label>
+        <input type="email" id="emailInput" placeholder="example@email.com">
+        <button id="sendInvoiceBtn" class="continue-btn" style="margin-top:15px;">SEND INVOICE</button>
+    </div>
+
+    <div id="contactMethodBlock" style="display:none; margin-top:35px; text-align:center;">
+        <h2 style="font-size:22px;">How would you prefer to communicate?</h2>
+
+        <div style="margin-top:20px;">
+            <button class="continue-btn" style="background:#444;" onclick="selectContactMethod('email')">
+                Email
+            </button>
+        </div>
+
+        <div style="margin-top:15px;">
+            <button class="continue-btn" onclick="selectContactMethod('phone')">
+                Phone
+            </button>
+        </div>
+    </div>
+
+    <div id="phoneBlock" style="display:none; margin-top:25px;">
+        <label class="label">Enter your phone number</label>
+        <input type="text" id="phoneInput" placeholder="+1 512 555 0000">
+        <button id="finishBtn" class="continue-btn" style="margin-top:15px;">FINISH</button>
+    </div>
+
+    <div id="finalMessage" style="display:none; margin-top:35px; text-align:center; font-size:22px; font-weight:700;">
+        Thank you! Our project manager will contact you shortly.
+    </div>
+
+    <div id="anotherQuote" style="display:none; margin-top:25px; text-align:center;">
+        <button class="continue-btn" onclick="startNewQuote()">Make another quote</button>
+    </div>
+
+</div>
+
+
+<script>
+// -----------------------------
+// LOAD DATA FROM PREVIOUS STEPS
+// -----------------------------
+const step1 = JSON.parse(localStorage.getItem("step1") || "{}");
+const step2_design = localStorage.getItem("step2_design");
+const step2_variant = localStorage.getItem("step2_variant");
+const step3_finish = localStorage.getItem("step3_finish");
+const step4_prep = localStorage.getItem("step4_prep");
+const step5_zip = localStorage.getItem("step5_zip");
+
+// -----------------------------
+// PRICE CALCULATION (TEMPORARY)
+// -----------------------------
+function calculatePrice() {
+    let sqft = (step1.width || 0) * (step1.height || 0);
+    if (!sqft) return "unknown";
+
+    let base = 18; // later — formula for Austin
+    return Math.round(sqft * base);
+}
+
+document.getElementById("finalPriceBlock").textContent =
+    "Your final price: $" + calculatePrice();
+
+// -----------------------------
+// SHOW INSTALLATION DATE
+// -----------------------------
+document.getElementById("showDateBtn").onclick = () => {
+    const dateBlock = document.getElementById("dateBlock");
+    const dateValue = document.getElementById("dateValue");
+
+    let today = new Date();
+    today.setDate(today.getDate() + 7);
+
+    dateValue.textContent = today.toDateString();
+    dateBlock.style.display = "block";
+
+    document.getElementById("continueOrderBtn").style.display = "block";
+};
+
+// -----------------------------
+// SHOW EMAIL INPUT
+// -----------------------------
+document.getElementById("continueOrderBtn").onclick = () => {
+    document.getElementById("emailBlock").style.display = "block";
+};
+
+// -----------------------------
+// SEND INVOICE BUTTON → show contact options
+// -----------------------------
+document.getElementById("sendInvoiceBtn").onclick = () => {
+    let email = document.getElementById("emailInput").value.trim();
+    if (!email) {
+        alert("Please enter your email.");
+        return;
+    }
+
+    window.collectedEmail = email;
+    document.getElementById("contactMethodBlock").style.display = "block";
+};
+
+// -----------------------------
+// CONTACT METHOD (email / phone)
+// -----------------------------
+function selectContactMethod(method) {
+    if (method === "email") {
+        finishOrder(null);
+    } else {
+        document.getElementById("phoneBlock").style.display = "block";
+    }
+}
+
+// -----------------------------
+// FINISH BUTTON (phone case)
+// -----------------------------
+document.getElementById("finishBtn").onclick = () => {
+    const phone = document.getElementById("phoneInput").value.trim();
+    if (!phone) {
+        alert("Enter your phone number");
+        return;
+    }
+    finishOrder(phone);
+};
+
+// -----------------------------
+// SEND DATA TO N8N
+// -----------------------------
+async function finishOrder(phone) {
+    document.getElementById("finalMessage").style.display = "block";
+    document.getElementById("anotherQuote").style.display = "block";
+
+    const payload = {
+        price: calculatePrice(),
+        width: step1.width,
+        height: step1.height,
+        design: step2_design,
+        variant: step2_variant,
+        finishing: step3_finish,
+        preparation: step4_prep,
+        zip: step5_zip,
+        email: window.collectedEmail,
+        phone: phone || null
+    };
+
+    try {
+        await fetch("https://wallartacwllc.app.n8n.cloud/webhook/accentwall/order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            mode: "no-cors",
+            body: JSON.stringify(payload)
+        });
+    } catch (e) {
+        console.log("Error sending data:", e);
+    }
+}
+
+// -----------------------------
+// NEW QUOTE
+// -----------------------------
+function startNewQuote() {
+    localStorage.clear();
+    window.location.href = "index.html";
+}
+</script>
+
+</body>
+</html>

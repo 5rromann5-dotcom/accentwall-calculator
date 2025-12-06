@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accent Wall — Step 2.2</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1 class="title">SELECT YOUR VARIANT</h1>
+
+    <div id="variantsContainer"></div>
+
+</div>
+
+<!-- Bottom bar -->
+<div class="bottom-bar">
+    <button class="nav-btn back-btn" onclick="goBack()">BACK</button>
+    <button class="nav-btn next-btn" id="continueBtn" disabled>CONTINUE</button>
+</div>
+
+<!-- Tooltip image -->
+<div id="tooltipOverlay" class="tooltip-image"></div>
+
+<script>
+let selectedVariant = null;
+
+// ----- DEFINE VARIANTS -----
+const variants = {
+    "Board & Batten": [
+        {name: "Frame + Vertical Boards", img: "variant_bb1.jpg", tip: "variant_bb1_tip.jpg"},
+        {name: "Frame + 2 Horizontal Boards", img: "variant_bb2.jpg", tip: "variant_bb2_tip.jpg"},
+        {name: "Squares (Grid Pattern)", img: "variant_bb3.jpg", tip: "variant_bb3_tip.jpg"},
+        {name: "Custom Option", img: "custom_variant.jpg", custom: true}
+    ],
+
+    "Modern Geometric": [
+        {name: "Herringbone Pattern", img: "variant_mg1.jpg", tip: "variant_mg1_tip.jpg"},
+        {name: "Diagonal Lines", img: "variant_mg2.jpg", tip: "variant_mg2_tip.jpg"},
+        {name: "Custom Option", img: "custom_variant.jpg", custom: true}
+    ],
+
+    "Slat / Shiplap": [
+        {name: "Vertical Slats", img: "variant_slat1.jpg", tip: "variant_slat1_tip.jpg"},
+        {name: "Horizontal Slats", img: "variant_slat2.jpg", tip: "variant_slat2_tip.jpg"},
+        {name: "Custom Option", img: "custom_variant.jpg", custom: true}
+    ],
+
+    "Herringbone / Chevron": [
+        {name: "Chevron Pattern", img: "variant_hc1.jpg", tip: "variant_hc1_tip.jpg"},
+        {name: "Herringbone Pattern", img: "variant_hc2.jpg", tip: "variant_hc2_tip.jpg"},
+        {name: "Custom Option", img: "custom_variant.jpg", custom: true}
+    ]
+};
+
+// ----- LOAD CHOSEN DESIGN -----
+const design = localStorage.getItem("step2_design");
+
+// ----- BUILD VARIANTS UI -----
+function loadVariants() {
+    const container = document.getElementById("variantsContainer");
+    container.innerHTML = "";
+
+    variants[design].forEach((v, index) => {
+        const box = document.createElement("div");
+        box.className = "variant-box";
+        box.onclick = () => selectVariant(index);
+
+        box.innerHTML = `
+            <img src="img/${v.img}">
+            <div class="variant-title">${v.name}
+                ${!v.custom ? `<span class="tooltip-icon" onclick="event.stopPropagation(); showTip('${v.tip}')">?</span>` : ""}
+            </div>
+        `;
+
+        container.appendChild(box);
+    });
+}
+
+loadVariants();
+
+// ----- SELECT VARIANT -----
+function selectVariant(i) {
+    selectedVariant = i;
+
+    document.querySelectorAll(".variant-box").forEach((el, idx) => {
+        el.classList.toggle("variant-selected", idx === i);
+    });
+
+    document.getElementById("continueBtn").disabled = false;
+    document.getElementById("continueBtn").style.opacity = "1";
+}
+
+// ----- SHOW TOOLTIP IMAGE -----
+function showTip(imgName) {
+    const overlay = document.getElementById("tooltipOverlay");
+    overlay.innerHTML = `<img src="img/${imgName}">`;
+    overlay.classList.add("visible");
+    overlay.onclick = () => overlay.classList.remove("visible");
+}
+
+// ----- NAVIGATION -----
+document.getElementById("continueBtn").onclick = () => {
+    const chosen = variants[design][selectedVariant];
+
+    if (chosen.custom) {
+        localStorage.setItem("step2_variant", "CUSTOM");
+        window.location.href = "step7.html";
+    } else {
+        localStorage.setItem("step2_variant", chosen.name);
+        window.location.href = "step3.html";
+    }
+};
+
+function goBack() {
+    window.location.href = "step2.html";
+}
+</script>
+
+</body>
+</html>

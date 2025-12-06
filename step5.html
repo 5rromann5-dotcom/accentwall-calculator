@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accent Wall — Step 5</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="container">
+
+    <h1 class="title">ENTER YOUR ZIP CODE</h1>
+
+    <label class="label">ZIP Code</label>
+    <input type="number" id="zip" placeholder="e.g. 78641">
+
+</div>
+
+<!-- Bottom bar -->
+<div class="bottom-bar">
+    <button class="nav-btn back-btn" onclick="goBack()">BACK</button>
+    <button class="nav-btn next-btn" id="continueBtn" disabled>CONTINUE</button>
+</div>
+
+<script>
+// Validate ZIP (simple US 5-digit rule)
+document.getElementById("zip").addEventListener("input", function () {
+    const val = this.value.trim();
+    const btn = document.getElementById("continueBtn");
+
+    if (/^\d{5}$/.test(val)) {
+        btn.disabled = false;
+        btn.style.opacity = "1";
+    } else {
+        btn.disabled = true;
+        btn.style.opacity = "0.5";
+    }
+});
+
+// Continue → Step 6
+document.getElementById("continueBtn").onclick = () => {
+    const zip = document.getElementById("zip").value.trim();
+    localStorage.setItem("step5_zip", zip);
+
+    window.location.href = "step6.html";
+};
+
+function goBack() {
+    window.location.href = "step4.html";
+}
+</script>
+
+</body>
+</html>
