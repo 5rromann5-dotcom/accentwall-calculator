@@ -1,54 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accent Wall — Step 5</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background: #f7f7f7;
+        display: flex;
+        justify-content: center;
+    }
+
+    .container {
+        width: 950px;
+        min-height: 700px;
+        background: white;
+        padding: 40px 60px;
+        border-radius: 22px;
+        margin-top: 40px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        position: relative;
+        padding-bottom: 120px;
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 32px;
+        margin-bottom: 40px;
+        font-weight: 700;
+    }
+
+    .zip-wrapper {
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    #zipInput {
+        width: 260px;
+        padding: 16px;
+        font-size: 22px;
+        border: 2px solid #ccc;
+        border-radius: 14px;
+        text-align: center;
+        outline: none;
+        transition: 0.25s;
+    }
+
+    #zipInput:focus {
+        border-color: #111;
+    }
+
+    .bottom-bar {
+        position: fixed;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 950px;
+        background: white;
+        border-top: 1px solid #ccc;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 30px;
+        box-shadow: 0 -4px 18px rgba(0,0,0,0.12);
+        border-radius: 18px 18px 0 0;
+    }
+
+    .back-btn {
+        font-size: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        color: #444;
+    }
+
+    .price-box {
+        font-size: 26px;
+        font-weight: 700;
+    }
+
+    .next-btn {
+        padding: 12px 24px;
+        font-size: 20px;
+        font-weight: 700;
+        background: #111;
+        color: white;
+        border-radius: 12px;
+        cursor: pointer;
+        opacity: 0.4;
+        pointer-events: none;
+        transition: 0.25s;
+    }
+    .next-btn.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+</style>
 </head>
+
 <body>
 
 <div class="container">
+    <h1>ENTER YOUR ZIP CODE</h1>
 
-    <h1 class="title">ENTER YOUR ZIP CODE</h1>
-
-    <label class="label">ZIP Code</label>
-    <input type="number" id="zip" placeholder="e.g. 78641">
-
+    <div class="zip-wrapper">
+        <input id="zipInput" maxlength="5" placeholder="ZIP Code">
+    </div>
 </div>
 
-<!-- Bottom bar -->
 <div class="bottom-bar">
-    <button class="nav-btn back-btn" onclick="goBack()">BACK</button>
-    <button class="nav-btn next-btn" id="continueBtn" disabled>CONTINUE</button>
+    <div class="back-btn" onclick="goBack()">← Back</div>
+    <div class="price-box" id="priceBox">$0.00</div>
+    <div class="next-btn" id="nextBtn">Continue</div>
 </div>
 
 <script>
-// Validate ZIP (simple US 5-digit rule)
-document.getElementById("zip").addEventListener("input", function () {
-    const val = this.value.trim();
-    const btn = document.getElementById("continueBtn");
 
-    if (/^\d{5}$/.test(val)) {
-        btn.disabled = false;
-        btn.style.opacity = "1";
+/* =========================================================
+   EDIT HERE — PRICE COEFFICIENTS BY ZIP REGION
+   ========================================================= */
+const ZIP_COEF = {
+    local: 1.00,     // Austin ZIPs (787xx)
+    near: 1.10,      // Nearby suburbs (786xx)
+    mid: 1.25,       // Central Texas (78xxx)
+    remote: 1.40     // Out of region
+};
+/* ========================================================= */
+
+
+/* URL PARAMETERS */
+const params = new URLSearchParams(window.location.search);
+const design  = params.get("design");
+const variant = params.get("variant");
+const prep    = params.get("prep");
+const finish  = params.get("finish");
+const area    = parseFloat(params.get("area"));
+const price   = parseFloat(params.get("price"));
+
+document.getElementById("priceBox").textContent = "$" + price.toFixed(2);
+
+let selectedZip = null;
+let finalPrice = price;
+
+
+/* Determine zone coefficient */
+function getZipCoef(zip) {
+    if (/^787/.test(zip)) return ZIP_COEF.local;
+    if (/^786/.test(zip)) return ZIP_COEF.near;
+    if (/^78/.test(zip))  return ZIP_COEF.mid;
+    return ZIP_COEF.remote;
+}
+
+
+/* ZIP validation + price update */
+document.getElementById("zipInput").addEventListener("input", function () {
+    const zip = this.value;
+
+    if (/^\d{5}$/.test(zip)) {
+        selectedZip = zip;
+
+        const coef = getZipCoef(zip);
+        finalPrice = price * coef;
+
+        document.getElementById("priceBox").textContent =
+            "$" + finalPrice.toFixed(2);
+
+        document.getElementById("nextBtn").classList.add("active");
     } else {
-        btn.disabled = true;
-        btn.style.opacity = "0.5";
+        document.getElementById("priceBox").textContent = "$" + price.toFixed(2);
+        document.getElementById("nextBtn").classList.remove("active");
     }
 });
 
-// Continue → Step 6
-document.getElementById("continueBtn").onclick = () => {
-    const zip = document.getElementById("zip").value.trim();
-    localStorage.setItem("step5_zip", zip);
 
-    window.location.href = "step6.html";
-};
-
+/* Back */
 function goBack() {
-    window.location.href = "step4.html";
+    window.location.href =
+        `step4.html?design=${design}&variant=${variant}&prep=${prep}&area=${area}&price=${price}&finish=${finish}`;
 }
+
+
+/* Continue */
+document.getElementById("nextBtn").onclick = () => {
+    if (!selectedZip) return;
+
+    window.location.href =
+        `step6.html?design=${design}&variant=${variant}&prep=${prep}&finish=${finish}&area=${area}&price=${finalPrice}&zip=${selectedZip}`;
+};
 </script>
 
 </body>

@@ -1,193 +1,256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accent Wall — Step 6</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background: #f7f7f7;
+        display: flex;
+        justify-content: center;
+    }
+
+    .container {
+        width: 950px;
+        min-height: 900px;
+        background: white;
+        padding: 40px 60px 140px;
+        border-radius: 22px;
+        margin-top: 40px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        position: relative;
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 25px;
+    }
+
+    .price-box {
+        width: 100%;
+        background: #f1f1f1;
+        padding: 18px 26px;
+        border-radius: 14px;
+        font-size: 24px;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 35px;
+    }
+
+    .step-block {
+        text-align: center;
+        display: none;
+        margin-top: 35px;
+        font-size: 22px;
+        font-weight: 600;
+    }
+
+    .btn-row {
+        margin-top: 25px;
+        display: flex;
+        justify-content: center;
+        gap: 35px;
+    }
+
+    .btn {
+        padding: 14px 28px;
+        background: #111;
+        color: white;
+        border-radius: 14px;
+        font-size: 20px;
+        cursor: pointer;
+        transition: 0.2s;
+        min-width: 160px;
+        text-align: center;
+    }
+
+    .btn:hover {
+        transform: scale(1.05);
+    }
+
+    .input-field {
+        margin-top: 18px;
+        padding: 14px;
+        width: 330px;
+        font-size: 20px;
+        border-radius: 12px;
+        border: 1px solid #ccc;
+        text-align: center;
+    }
+</style>
 </head>
+
 <body>
 
-<div class="container" id="mainContainer">
+<div class="container">
 
-    <h1 class="title">YOUR FINAL PRICE</h1>
+    <h1>FINAL PRICE</h1>
 
-    <div id="finalPriceBlock" class="final-price">
-        Loading price...
-    </div>
+    <div id="priceBox" class="price-box">Loading price...</div>
 
-    <button id="showDateBtn" class="continue-btn">Show estimated installation date</button>
-
-    <div id="dateBlock" style="display:none; margin-top:20px; font-size:20px; font-weight:600;">
-        Estimated installation: <span id="dateValue"></span>
-    </div>
-
-    <button id="continueOrderBtn" class="continue-btn" style="margin-top:25px; display:none;">
+    <!-- STEP 1 — CONTINUE? -->
+    <div id="q1" class="step-block">
         Would you like to continue with your order?
-    </button>
-
-    <div id="emailBlock" style="display:none; margin-top:25px;">
-        <label class="label">Enter your email</label>
-        <input type="email" id="emailInput" placeholder="example@email.com">
-        <button id="sendInvoiceBtn" class="continue-btn" style="margin-top:15px;">SEND INVOICE</button>
-    </div>
-
-    <div id="contactMethodBlock" style="display:none; margin-top:35px; text-align:center;">
-        <h2 style="font-size:22px;">How would you prefer to communicate?</h2>
-
-        <div style="margin-top:20px;">
-            <button class="continue-btn" style="background:#444;" onclick="selectContactMethod('email')">
-                Email
-            </button>
-        </div>
-
-        <div style="margin-top:15px;">
-            <button class="continue-btn" onclick="selectContactMethod('phone')">
-                Phone
-            </button>
+        <div class="btn-row">
+            <div class="btn" onclick="stepEmail()">Yes</div>
+            <div class="btn" onclick="finishNo()">No</div>
         </div>
     </div>
 
-    <div id="phoneBlock" style="display:none; margin-top:25px;">
-        <label class="label">Enter your phone number</label>
-        <input type="text" id="phoneInput" placeholder="+1 512 555 0000">
-        <button id="finishBtn" class="continue-btn" style="margin-top:15px;">FINISH</button>
+    <!-- STEP 2 — EMAIL -->
+    <div id="emailBlock" class="step-block">
+        Please enter your email:
+        <br>
+        <input id="emailInput" class="input-field" type="email" placeholder="your@email.com">
+        <div class="btn" style="margin-top:20px;" onclick="confirmEmail()">Confirm</div>
     </div>
 
-    <div id="finalMessage" style="display:none; margin-top:35px; text-align:center; font-size:22px; font-weight:700;">
-        Thank you! Our project manager will contact you shortly.
+    <!-- STEP 3 — COMMUNICATION METHOD -->
+    <div id="methodBlock" class="step-block">
+        How would you prefer to communicate?
+        <div class="btn-row">
+            <div class="btn" onclick="finishEmail()">By Email</div>
+            <div class="btn" onclick="stepPhone()">By Phone</div>
+        </div>
     </div>
 
-    <div id="anotherQuote" style="display:none; margin-top:25px; text-align:center;">
-        <button class="continue-btn" onclick="startNewQuote()">Make another quote</button>
+    <!-- STEP 4 — PHONE -->
+    <div id="phoneBlock" class="step-block">
+        Please enter your phone number:
+        <br>
+        <input id="phoneInput" class="input-field" type="text" placeholder="+1 (___) ___-____">
+        <div class="btn" style="margin-top:20px;" onclick="finishPhone()">Confirm</div>
+    </div>
+
+    <!-- FINAL MESSAGE -->
+    <div id="finalBlock" class="step-block">
+        Thank you! Our manager will contact you shortly.
+    </div>
+
+    <!-- ANOTHER WALL? -->
+    <div id="againBlock" class="step-block">
+        Would you like to calculate another wall?
+        <div class="btn-row">
+            <div class="btn" onclick="calcAgain()">Yes</div>
+            <div class="btn" onclick="closeAll()">No</div>
+        </div>
     </div>
 
 </div>
 
-
 <script>
-// -----------------------------
-// LOAD DATA FROM PREVIOUS STEPS
-// -----------------------------
-const step1 = JSON.parse(localStorage.getItem("step1") || "{}");
-const step2_design = localStorage.getItem("step2_design");
-const step2_variant = localStorage.getItem("step2_variant");
-const step3_finish = localStorage.getItem("step3_finish");
-const step4_prep = localStorage.getItem("step4_prep");
-const step5_zip = localStorage.getItem("step5_zip");
+/* ----------- LOAD PARAMETERS ----------- */
+const urlParams = new URLSearchParams(window.location.search);
+const price = parseFloat(urlParams.get("price") || 0);
 
-// -----------------------------
-// PRICE CALCULATION (TEMPORARY)
-// -----------------------------
-function calculatePrice() {
-    let sqft = (step1.width || 0) * (step1.height || 0);
-    if (!sqft) return "unknown";
-
-    let base = 18; // later — formula for Austin
-    return Math.round(sqft * base);
-}
-
-document.getElementById("finalPriceBlock").textContent =
-    "Your final price: $" + calculatePrice();
-
-// -----------------------------
-// SHOW INSTALLATION DATE
-// -----------------------------
-document.getElementById("showDateBtn").onclick = () => {
-    const dateBlock = document.getElementById("dateBlock");
-    const dateValue = document.getElementById("dateValue");
-
-    let today = new Date();
-    today.setDate(today.getDate() + 7);
-
-    dateValue.textContent = today.toDateString();
-    dateBlock.style.display = "block";
-
-    document.getElementById("continueOrderBtn").style.display = "block";
+const collected = {
+    price: price,
+    area: urlParams.get("area"),
+    design: urlParams.get("design"),
+    variant: urlParams.get("variant"),
+    prep: urlParams.get("prep"),
+    finish: urlParams.get("finish"),
+    zip: urlParams.get("zip"),
+    email: "",
+    phone: "",
+    method: ""
 };
 
-// -----------------------------
-// SHOW EMAIL INPUT
-// -----------------------------
-document.getElementById("continueOrderBtn").onclick = () => {
+document.getElementById("priceBox").textContent =
+    "Your final project price: $" + price.toFixed(2);
+
+/* Show first step */
+document.getElementById("q1").style.display = "block";
+
+/* ----------- STEP SWITCH HELPERS ----------- */
+function hideAll() {
+    ["q1","emailBlock","methodBlock","phoneBlock","finalBlock","againBlock"]
+        .forEach(id => document.getElementById(id).style.display = "none");
+}
+
+/* ----------- STEP 1 → STEP 2 ----------- */
+function stepEmail() {
+    hideAll();
     document.getElementById("emailBlock").style.display = "block";
-};
+}
 
-// -----------------------------
-// SEND INVOICE BUTTON → show contact options
-// -----------------------------
-document.getElementById("sendInvoiceBtn").onclick = () => {
-    let email = document.getElementById("emailInput").value.trim();
-    if (!email) {
-        alert("Please enter your email.");
+function finishNo() {
+    alert("Thank you!");
+    try { window.close(); } catch(e) {}
+}
+
+/* ----------- STEP 2: EMAIL CONFIRM ----------- */
+function confirmEmail() {
+    const email = document.getElementById("emailInput").value.trim();
+    if (!email.includes("@")) {
+        alert("Please enter a valid email.");
         return;
     }
 
-    window.collectedEmail = email;
-    document.getElementById("contactMethodBlock").style.display = "block";
-};
+    collected.email = email;
 
-// -----------------------------
-// CONTACT METHOD (email / phone)
-// -----------------------------
-function selectContactMethod(method) {
-    if (method === "email") {
-        finishOrder(null);
-    } else {
-        document.getElementById("phoneBlock").style.display = "block";
-    }
+    hideAll();
+    document.getElementById("methodBlock").style.display = "block";
 }
 
-// -----------------------------
-// FINISH BUTTON (phone case)
-// -----------------------------
-document.getElementById("finishBtn").onclick = () => {
+/* ----------- STEP 3: METHOD ----------- */
+function finishEmail() {
+    collected.method = "email";
+    showFinal();
+}
+
+function stepPhone() {
+    hideAll();
+    document.getElementById("phoneBlock").style.display = "block";
+}
+
+/* ----------- STEP 4: PHONE CONFIRM ----------- */
+function finishPhone() {
     const phone = document.getElementById("phoneInput").value.trim();
-    if (!phone) {
-        alert("Enter your phone number");
+    if (phone.length < 7) {
+        alert("Please enter a valid phone number.");
         return;
     }
-    finishOrder(phone);
-};
 
-// -----------------------------
-// SEND DATA TO N8N
-// -----------------------------
-async function finishOrder(phone) {
-    document.getElementById("finalMessage").style.display = "block";
-    document.getElementById("anotherQuote").style.display = "block";
+    collected.phone = phone;
+    collected.method = "phone";
 
-    const payload = {
-        price: calculatePrice(),
-        width: step1.width,
-        height: step1.height,
-        design: step2_design,
-        variant: step2_variant,
-        finishing: step3_finish,
-        preparation: step4_prep,
-        zip: step5_zip,
-        email: window.collectedEmail,
-        phone: phone || null
-    };
-
-    try {
-        await fetch("https://wallartacwllc.app.n8n.cloud/webhook/accentwall/order", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            mode: "no-cors",
-            body: JSON.stringify(payload)
-        });
-    } catch (e) {
-        console.log("Error sending data:", e);
-    }
+    showFinal();
 }
 
-// -----------------------------
-// NEW QUOTE
-// -----------------------------
-function startNewQuote() {
-    localStorage.clear();
+/* ----------- FINAL + AFTER 1 SEC ASK AGAIN ----------- */
+function showFinal() {
+    hideAll();
+    document.getElementById("finalBlock").style.display = "block";
+
+    setTimeout(() => {
+        document.getElementById("againBlock").style.display = "block";
+    }, 1000);
+
+    sendToCRM();
+}
+
+/* ----------- AGAIN ----------- */
+function calcAgain() {
     window.location.href = "index.html";
+}
+
+function closeAll() {
+    alert("Thank you!");
+    try { window.close(); } catch(e) {}
+}
+
+/* ----------- SEND TO CRM ----------- */
+function sendToCRM() {
+    fetch("https://wallartacwllc.app.n8n.cloud/webhook/accentwall/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(collected)
+    }).catch(err => console.error("CRM SEND ERROR:", err));
 }
 </script>
 

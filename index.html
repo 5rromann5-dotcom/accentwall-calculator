@@ -1,78 +1,233 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Accent Wall Calculator - Step 1</title>
-    <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8">
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background: #f7f7f7;
+        display: flex;
+        justify-content: center;
+    }
+
+    .container {
+        width: 900px;
+        min-height: 850px;
+        background: white;
+        padding: 40px 60px;
+        border-radius: 22px;
+        margin-top: 40px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        position: relative;
+    }
+
+    h1 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-size: 32px;
+        font-weight: 700;
+    }
+
+    .image-block {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+    .image-block img {
+        width: 85%;
+        max-width: 650px;
+        border-radius: 12px;
+        border: 1px solid #ccc;
+    }
+
+    .row {
+        text-align: center;
+        margin-top: 18px;
+        position: relative;
+    }
+
+    label {
+        font-size: 20px;
+        font-weight: 600;
+        margin-right: 8px;
+    }
+
+    .input-field {
+        width: 180px;
+        padding: 12px;
+        font-size: 20px;
+        border-radius: 12px;
+        border: 1px solid #bbb;
+        text-align: center;
+    }
+
+    .tip-wrapper {
+        display: inline-block;
+        position: relative;
+        margin-left: 8px;
+    }
+
+    .tip-icon {
+        font-size: 20px;
+        background: #eee;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+
+    .tooltip-bubble {
+        position: absolute;
+        top: 50%;
+        left: 34px;
+        transform: translateY(-50%);
+        background: white;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+        width: 240px;
+        font-size: 15px;
+        display: none;
+        z-index: 100;
+        text-align: left;
+    }
+
+    .area-box {
+        margin-top: 30px;
+        font-size: 24px;
+        font-weight: 700;
+        padding: 18px 30px;
+        background: #f1f1f1;
+        border-radius: 16px;
+        display: inline-block;
+    }
+
+    .next-btn {
+        margin-top: 60px;
+        display: block;
+        width: 260px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        padding: 16px 0;
+        font-size: 22px;
+        font-weight: 700;
+        background: #111;
+        color: white;
+        border-radius: 14px;
+        cursor: pointer;
+        opacity: 0.5;
+        pointer-events: none;
+        transition: 0.25s;
+    }
+
+    .next-btn.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+</style>
 </head>
+
 <body>
 
 <div class="container">
 
-    <h1 class="title">ENTER YOUR WALL DIMENSIONS</h1>
+    <h1>ENTER YOUR WALL DIMENSIONS</h1>
 
-    <div class="wall-preview">
-        <img src="img/1HW.png" class="wall-img" alt="Wall Preview" />
+    <div class="image-block">
+        <img src="img/1HW.png" alt="Wall Preview">
     </div>
 
-    <label class="label">
-        Wall Width (in feet)
-        <span class="tooltip-icon" onclick="showTooltip('widthTip')">?</span>
-    </label>
-    <input type="number" id="width" placeholder="Enter width" />
+    <div class="row">
+        <label>Wall Height (ft)</label>
+        <input id="heightInput" class="input-field" type="number" min="1" oninput="updateArea()">
 
-    <div id="widthTip" class="tooltip-image">
-        <img src="img/width-tip.png">
+        <span class="tip-wrapper">
+            <span class="tip-icon" onclick="toggleTip('tip1')">?</span>
+            <div id="tip1" class="tooltip-bubble">
+                Enter the full height of your accent wall.
+            </div>
+        </span>
     </div>
 
-    <label class="label">
-        Wall Height (in feet)
-        <span class="tooltip-icon" onclick="showTooltip('heightTip')">?</span>
-    </label>
-    <input type="number" id="height" placeholder="Enter height" />
+    <div class="row">
+        <label>Wall Width (ft)</label>
+        <input id="widthInput" class="input-field" type="number" min="1" oninput="updateArea()">
 
-    <div id="heightTip" class="tooltip-image">
-        <img src="img/height-tip.png">
+        <span class="tip-wrapper">
+            <span class="tip-icon" onclick="toggleTip('tip2')">?</span>
+            <div id="tip2" class="tooltip-bubble">
+                Enter the full width of your wall.
+            </div>
+        </span>
     </div>
 
-    <button id="continueBtn" class="continue-btn disabled" disabled>
-        CONTINUE
-    </button>
+    <div class="row">
+        <div id="areaBox" class="area-box">Your wall is: 0 sq ft</div>
+    </div>
+
+    <div id="nextBtn" class="next-btn">Continue</div>
 
 </div>
 
 <script>
-function showTooltip(id) {
-    document.getElementById(id).classList.toggle("visible");
+// -----------------------------
+// TOOLTIP
+// -----------------------------
+function toggleTip(id) {
+    const el = document.getElementById(id);
+    const visible = el.style.display === "block";
+    document.querySelectorAll(".tooltip-bubble").forEach(b => b.style.display = "none");
+    el.style.display = visible ? "none" : "block";
 }
 
-function validate() {
-    const w = document.getElementById("width").value;
-    const h = document.getElementById("height").value;
-    const btn = document.getElementById("continueBtn");
+// -----------------------------
+// UPDATE AREA + SAVE DATA
+// -----------------------------
+function updateArea() {
+    const h = parseFloat(document.getElementById("heightInput").value);
+    const w = parseFloat(document.getElementById("widthInput").value);
 
-    if (w > 0 && h > 0) {
-        btn.classList.remove("disabled");
-        btn.disabled = false;
-    } else {
-        btn.classList.add("disabled");
-        btn.disabled = true;
+    const areaBox = document.getElementById("areaBox");
+    const nextBtn = document.getElementById("nextBtn");
+
+    if (!h || !w || h <= 0 || w <= 0) {
+        areaBox.textContent = "Your wall is: 0 sq ft";
+        nextBtn.classList.remove("active");
+        nextBtn.onclick = null;
+        return;
     }
-}
 
-document.getElementById("width").addEventListener("input", validate);
-document.getElementById("height").addEventListener("input", validate);
+    // Площадь
+    const area = (h * w).toFixed(1);
+    areaBox.textContent = `Your wall is: ${area} sq ft`;
 
-document.getElementById("continueBtn").onclick = () => {
-    const data = {
-        width: document.getElementById("width").value,
-        height: document.getElementById("height").value
+    // -----------------------------
+    // Height Level for pricing
+    // -----------------------------
+    let heightLevel = 0;
+    if (h > 10 && h <= 16) heightLevel = 1;
+    if (h > 16) heightLevel = 2;
+
+    // Save to localStorage
+    localStorage.setItem("wallHeight", h);
+    localStorage.setItem("wallWidth", w);
+    localStorage.setItem("wallArea", area);
+    localStorage.setItem("heightLevel", heightLevel);
+
+    nextBtn.classList.add("active");
+
+    nextBtn.onclick = () => {
+        window.location.href = `step2.html?area=${area}`;
     };
-
-    localStorage.setItem("step1", JSON.stringify(data));
-    window.location.href = "step2.html";
-};
+}
 </script>
 
 </body>

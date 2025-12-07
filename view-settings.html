@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background: #f5f5f5;
+        display: flex;
+        justify-content: center;
+    }
+
+    .container {
+        width: 950px;
+        background: white;
+        padding: 40px 60px;
+        margin-top: 40px;
+        border-radius: 22px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 32px;
+        margin-bottom: 35px;
+        font-weight: 700;
+    }
+
+    h2 {
+        font-size: 24px;
+        margin-top: 40px;
+        margin-bottom: 15px;
+        font-weight: 700;
+        color: #333;
+    }
+
+    .block {
+        background: #fafafa;
+        border: 1px solid #ddd;
+        padding: 20px 25px;
+        border-radius: 16px;
+        font-size: 18px;
+        line-height: 1.6;
+    }
+
+    .formula-box {
+        background: #eef0f2;
+        border-left: 6px solid #333;
+        padding: 20px;
+        margin-top: 20px;
+        font-size: 18px;
+        border-radius: 14px;
+    }
+
+    .back-btn {
+        margin-top: 40px;
+        display: block;
+        width: 240px;
+        padding: 14px 0;
+        font-size: 20px;
+        font-weight: 700;
+        text-align: center;
+        background: #111;
+        color: white;
+        border-radius: 14px;
+        cursor: pointer;
+        margin-left: auto;
+        margin-right: auto;
+    }
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Current Calculator Settings</h1>
+
+    <div id="content"></div>
+
+    <div class="back-btn" onclick="window.location.href='admin.html'">← Back to Admin</div>
+
+</div>
+
+<script>
+function loadSettings() {
+    const data = JSON.parse(localStorage.getItem("adminSettings") || "{}");
+    const out = [];
+
+    out.push(`<h2>Design Prices ($ per sq ft)</h2>`);
+    out.push(`<div class='block'>`);
+    for (let k in data.designPrices) {
+        out.push(`<b>${k}</b>: $${data.designPrices[k]}<br>`);
+    }
+    out.push(`</div>`);
+
+    out.push(`<h2>Height Coefficients</h2>`);
+    out.push(`<div class='block'>
+        Under 10 ft: ${data.heightCoeff.under10}<br>
+        10–16 ft: ${data.heightCoeff.between10_16}<br>
+        Over 16 ft: ${data.heightCoeff.over16}
+    </div>`);
+
+    out.push(`<h2>Variant Coefficients</h2>`);
+    out.push(`<div class='block'>`);
+    for (let k in data.variantCoeff) {
+        out.push(`<b>${k}</b>: ${data.variantCoeff[k]}<br>`);
+    }
+    out.push(`</div>`);
+
+    out.push(`<h2>Wall Preparation Coefficients</h2>`);
+    out.push(`<div class='block'>
+        Smooth Wall: ${data.prepCoeff.smooth}<br>
+        Keep Texture: ${data.prepCoeff.texture}
+    </div>`);
+
+    out.push(`<h2>Finish Coefficients</h2>`);
+    out.push(`<div class='block'>
+        One Color: ${data.finishCoeff.oneColor}<br>
+        Multi Color: ${data.finishCoeff.multiColor}<br>
+        Partial Color: ${data.finishCoeff.partialColor}<br>
+        Solid Wood + Paint: ${data.finishCoeff.solidPaint}<br>
+        Solid Wood (Raw): ${data.finishCoeff.solidRaw}
+    </div>`);
+
+    out.push(`<h2>Distance Coefficient</h2>`);
+    out.push(`<div class='block'>
+        Austin Metro ZIP: ${data.distanceCoeff.local}<br>
+        Other Areas: ${data.distanceCoeff.remote}
+    </div>`);
+
+    out.push(`
+        <h2>Price Calculation Formula</h2>
+        <div class="formula-box">
+            Base Price = Area × DesignPrice × HeightCoeff<br><br>
+            Final Price = BasePrice × VariantCoeff × PrepCoeff × FinishCoeff × DistanceCoeff
+        </div>
+    `);
+
+    document.getElementById("content").innerHTML = out.join("");
+}
+
+loadSettings();
+</script>
+
+</body>
+</html>

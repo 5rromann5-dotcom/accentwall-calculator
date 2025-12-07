@@ -1,66 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accent Wall — Step 2</title>
-    <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<style>
+    body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background: #f7f7f7;
+        display: flex;
+        justify-content: center;
+    }
+    .container {
+        width: 950px;
+        min-height: 900px;
+        background: white;
+        padding: 40px 60px;
+        border-radius: 22px;
+        margin-top: 40px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+    h1 {
+        text-align: center;
+        margin-bottom: 35px;
+        font-size: 34px;
+        font-weight: 700;
+    }
+    .grid {
+        margin-top: 25px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 26px;
+    }
+    .tile {
+        background: #fff;
+        border-radius: 16px;
+        border: 1px solid #ccc;
+        cursor: pointer;
+        transition: 0.25s;
+        position: relative;
+    }
+    .tile:hover {
+        transform: scale(1.03);
+        box-shadow: 0 8px 22px rgba(0,0,0,0.15);
+    }
+    .tile.selected {
+        border: 3px solid black;
+        box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+    }
+    .tile img {
+        width: 100%;
+        height: 260px;
+        object-fit: cover;
+    }
+    .tile-label {
+        padding: 16px;
+        font-size: 22px;
+        font-weight: 600;
+        text-align: center;
+    }
+    .next-btn {
+        margin-top: 50px;
+        width: 260px;
+        margin-left: auto;
+        margin-right: auto;
+        padding: 18px 0;
+        text-align: center;
+        font-size: 22px;
+        font-weight: 700;
+        background: #111;
+        color: white;
+        border-radius: 14px;
+        opacity: 0.5;
+        pointer-events: none;
+        cursor: pointer;
+    }
+    .next-btn.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+</style>
 </head>
+
 <body>
 
 <div class="container">
+    <h1>CHOOSE YOUR ACCENT WALL DESIGN</h1>
 
-    <h1 class="title">CHOOSE YOUR DESIGN</h1>
-
-    <div class="tiles-container">
-
-        <div class="tile" style="background-image: url('img/board_batten.jpg');"
-             onclick="selectDesign('Board & Batten')">
+    <div class="grid">
+        <div class="tile" onclick="selectDesign(event, 'board_batten')">
+            <img src="img/board_batten.jpg">
             <div class="tile-label">Board & Batten</div>
         </div>
 
-        <div class="tile" style="background-image: url('img/modern_geometric.jpg');"
-             onclick="selectDesign('Modern Geometric')">
+        <div class="tile" onclick="selectDesign(event, 'modern_geometric')">
+            <img src="img/modern_geometric.jpg">
             <div class="tile-label">Modern Geometric</div>
         </div>
 
-        <div class="tile" style="background-image: url('img/slat_shiplap.jpg');"
-             onclick="selectDesign('Slat / Shiplap')">
+        <div class="tile" onclick="selectDesign(event, 'slat_shiplap')">
+            <img src="img/slat_shiplap.jpg">
             <div class="tile-label">Slat Wall / Shiplap</div>
         </div>
 
-        <div class="tile" style="background-image: url('img/herringbone.jpg');"
-             onclick="selectDesign('Herringbone / Chevron')">
+        <div class="tile" onclick="selectDesign(event, 'herringbone')">
+            <img src="img/herringbone.jpg">
             <div class="tile-label">Herringbone / Chevron</div>
         </div>
 
-        <div class="tile" style="background-image: url('img/custom.jpg');"
-             onclick="selectCustom()">
-            <div class="tile-label">Custom Pattern</div>
+        <div class="tile" onclick="selectDesign(event, 'custom')">
+            <img src="img/custom.jpg">
+            <div class="tile-label">Custom Design</div>
         </div>
-
     </div>
-</div>
 
-<!-- Bottom navigation -->
-<div class="bottom-bar">
-    <button class="nav-btn back-btn" onclick="goBack()">BACK</button>
+    <div id="nextBtn" class="next-btn">Continue</div>
 </div>
 
 <script>
-function selectDesign(design) {
-    localStorage.setItem("step2_design", design);
-    window.location.href = "step2_2.html";
+
+/* ============================================================
+   PRICE CONFIG — YOU CAN EDIT THESE VALUES
+   ============================================================ */
+const DESIGN_PRICE = {
+    board_batten: 12,        // цена за sq ft
+    modern_geometric: 16,
+    slat_shiplap: 10,
+    herringbone: 20
+};
+
+const HEIGHT_COEF = {
+    under10: 1.00,
+    h10_16: 1.25,
+    over16: 1.50
+};
+/* ============================================================ */
+
+let selected = null;
+const params = new URLSearchParams(window.location.search);
+const area = parseFloat(params.get("area"));
+const height = parseFloat(params.get("height"));
+
+/* вычисление коэф. высоты */
+function getHeightCoef(h) {
+    if (h < 10) return HEIGHT_COEF.under10;
+    if (h <= 16) return HEIGHT_COEF.h10_16;
+    return HEIGHT_COEF.over16;
 }
 
-function selectCustom() {
-    localStorage.setItem("step2_design", "CUSTOM");
-    window.location.href = "step7.html";
+function selectDesign(e, type) {
+    selected = type;
+
+    document.querySelectorAll(".tile").forEach(t => t.classList.remove("selected"));
+    e.currentTarget.classList.add("selected");
+
+    const next = document.getElementById("nextBtn");
+    next.classList.add("active");
+
+    next.onclick = () => {
+        if (selected === "custom") {
+            window.location.href = `step7.html?area=${area}&height=${height}`;
+        } else {
+            /* вычисляем базовую цену */
+            const basePrice = area * DESIGN_PRICE[selected] * getHeightCoef(height);
+
+            window.location.href =
+                `step2_variant.html?design=${selected}&area=${area}&height=${height}&base=${basePrice}`;
+        }
+    };
 }
 
-function goBack() {
-    window.location.href = "index.html";
-}
 </script>
 
 </body>
