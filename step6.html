@@ -30,15 +30,15 @@
         margin-bottom: 25px;
     }
 
-    .price-box {
+    .box {
         width: 100%;
         background: #f1f1f1;
         padding: 18px 26px;
         border-radius: 14px;
-        font-size: 24px;
-        font-weight: 700;
+        font-size: 22px;
+        font-weight: 600;
         text-align: center;
-        margin-bottom: 35px;
+        margin-bottom: 18px;
     }
 
     .step-block {
@@ -90,7 +90,18 @@
 
     <h1>FINAL PRICE</h1>
 
-    <div id="priceBox" class="price-box">Loading price...</div>
+    <!-- Final Price -->
+    <div id="priceBox" class="box">Loading price...</div>
+
+    <!-- Install Date -->
+    <div id="installDate" class="box" style="font-size:20px; font-weight:500;">
+        Checking estimated installation date...
+    </div>
+
+    <!-- Install Duration -->
+    <div id="durationBox" class="box" style="font-size:20px; font-weight:500;">
+        Calculating installation duration...
+    </div>
 
     <!-- STEP 1 — CONTINUE? -->
     <div id="q1" class="step-block">
@@ -105,11 +116,11 @@
     <div id="emailBlock" class="step-block">
         Please enter your email:
         <br>
-        <input id="emailInput" class="input-field" type="email" placeholder="your@email.com">
+        <input id="emailInput" class="input-field" type="email">
         <div class="btn" style="margin-top:20px;" onclick="confirmEmail()">Confirm</div>
     </div>
 
-    <!-- STEP 3 — COMMUNICATION METHOD -->
+    <!-- STEP 3 — METHOD -->
     <div id="methodBlock" class="step-block">
         How would you prefer to communicate?
         <div class="btn-row">
@@ -128,10 +139,12 @@
 
     <!-- FINAL MESSAGE -->
     <div id="finalBlock" class="step-block">
-        Thank you! Our manager will contact you shortly.
+        Thank you! Our manager will contact you shortly.<br>
+        <span id="finalInstallDate" style="font-size:20px;font-weight:500;"></span><br>
+        <span id="finalDuration" style="font-size:20px;font-weight:500;"></span>
     </div>
 
-    <!-- ANOTHER WALL? -->
+    <!-- AGAIN -->
     <div id="againBlock" class="step-block">
         Would you like to calculate another wall?
         <div class="btn-row">
@@ -157,22 +170,89 @@ const collected = {
     zip: urlParams.get("zip"),
     email: "",
     phone: "",
-    method: ""
+    method: "",
+    installDateISO: "",
+    installDateText: "",
+    installDuration: 1
 };
 
+// Show price
 document.getElementById("priceBox").textContent =
     "Your final project price: $" + price.toFixed(2);
+
+/* ----------- CALCULATE INSTALLATION DURATION ----------- */
+collected.installDuration = Math.max(1, Math.ceil(price / 800));
+document.getElementById("durationBox").textContent =
+    "Estimated installation duration: " + collected.installDuration + " day(s)";
+
+/* ----------- LOAD INSTALLATION DATE FROM N8N ----------- */
+
+/* ----------- LOAD INSTALLATION DATE FROM N8N ----------- */
+fetch("https://wallartacwllc.app.n8n.cloud/webhook/accentwall/slot", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+        price: collected.price,
+        area: collected.area,
+        design: collected.design,
+        variant: collected.variant,
+        prep: collected.prep,
+        finish: collected.finish,
+        zip: collected.zip,
+        width: localStorage.getItem("wallWidth"),
+        height: localStorage.getItem("wallHeight"),
+        installDuration: collected.installDuration
+    })
+})
+.then(async (r) => {
+    console.log("STATUS:", r.status);
+
+    const text = await r.text();
+    console.log("RAW RESPONSE FROM N8N:", text);
+
+    let data = null;
+    try {
+        data = JSON.parse(text);
+        console.log("PARSED JSON:", data);
+    } catch (e) {
+        console.error("JSON PARSE ERROR:", e);
+    }
+
+    return data;
+})
+.then(data => {
+    console.log("FINAL DATA USED IN STEP6:", data);
+
+    if (!data) {
+        document.getElementById("installDate").textContent =
+            "Estimated installation date: unavailable";
+        return;
+    }
+
+    collected.installDateISO = data.installDateISO;
+    collected.installDateText = data.installDateText;
+
+    document.getElementById("installDate").textContent =
+        "Estimated installation date: " + collected.installDateText;
+})
+
+.catch(err => {
+    console.error("Slot API error:", err);
+    document.getElementById("installDate").textContent =
+        "Estimated installation date: unavailable";
+});
+
 
 /* Show first step */
 document.getElementById("q1").style.display = "block";
 
-/* ----------- STEP SWITCH HELPERS ----------- */
+/* ----------- HELPERS ----------- */
 function hideAll() {
     ["q1","emailBlock","methodBlock","phoneBlock","finalBlock","againBlock"]
         .forEach(id => document.getElementById(id).style.display = "none");
 }
 
-/* ----------- STEP 1 → STEP 2 ----------- */
+/* ----------- STEP LOGIC ----------- */
 function stepEmail() {
     hideAll();
     document.getElementById("emailBlock").style.display = "block";
@@ -180,10 +260,8 @@ function stepEmail() {
 
 function finishNo() {
     alert("Thank you!");
-    try { window.close(); } catch(e) {}
 }
 
-/* ----------- STEP 2: EMAIL CONFIRM ----------- */
 function confirmEmail() {
     const email = document.getElementById("emailInput").value.trim();
     if (!email.includes("@")) {
@@ -192,12 +270,10 @@ function confirmEmail() {
     }
 
     collected.email = email;
-
     hideAll();
     document.getElementById("methodBlock").style.display = "block";
 }
 
-/* ----------- STEP 3: METHOD ----------- */
 function finishEmail() {
     collected.method = "email";
     showFinal();
@@ -208,7 +284,6 @@ function stepPhone() {
     document.getElementById("phoneBlock").style.display = "block";
 }
 
-/* ----------- STEP 4: PHONE CONFIRM ----------- */
 function finishPhone() {
     const phone = document.getElementById("phoneInput").value.trim();
     if (phone.length < 7) {
@@ -218,14 +293,19 @@ function finishPhone() {
 
     collected.phone = phone;
     collected.method = "phone";
-
     showFinal();
 }
 
-/* ----------- FINAL + AFTER 1 SEC ASK AGAIN ----------- */
+/* ----------- FINAL ----------- */
 function showFinal() {
     hideAll();
+
     document.getElementById("finalBlock").style.display = "block";
+    document.getElementById("finalInstallDate").textContent =
+        "Estimated installation date: " + collected.installDateText;
+
+    document.getElementById("finalDuration").textContent =
+        "Installation duration: " + collected.installDuration + " day(s)";
 
     setTimeout(() => {
         document.getElementById("againBlock").style.display = "block";
@@ -234,24 +314,27 @@ function showFinal() {
     sendToCRM();
 }
 
-/* ----------- AGAIN ----------- */
-function calcAgain() {
-    window.location.href = "index.html";
-}
-
-function closeAll() {
-    alert("Thank you!");
-    try { window.close(); } catch(e) {}
-}
-
 /* ----------- SEND TO CRM ----------- */
 function sendToCRM() {
+    collected.width = localStorage.getItem("wallWidth");
+    collected.height = localStorage.getItem("wallHeight");
+
+    // ДОБАВЛЯЕМ ОБЯЗАТЕЛЬНЫЕ ПАРАМЕТРЫ ДЛЯ N8N
+    collected.installDateISO = collected.installDateISO; 
+    collected.installDurationDays = collected.installDuration;
+
+    console.log("DATA SENT TO /order:", collected);
+
     fetch("https://wallartacwllc.app.n8n.cloud/webhook/accentwall/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(collected)
-    }).catch(err => console.error("CRM SEND ERROR:", err));
+    });
 }
+
+
+function calcAgain() { window.location.href = "index.html"; }
+function closeAll() { alert("Thank you!"); }
 </script>
 
 </body>
