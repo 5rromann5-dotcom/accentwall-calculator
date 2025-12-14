@@ -473,7 +473,9 @@ if (!designMap[design]) {
         tile.className = "tile";
 
         const img = document.createElement("img");
-        img.src = "img/" + v.img;
+        - img.src = "img/" + v.img;
++ img.src = "./img/" + v.img;
+
 
         const title = document.createElement("div");
         title.className = "tile-title";
