@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background: #f7f7f7;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    /* ---------- TOP BAR ---------- */
+    .topbar {
+        width: 100%;
+        background: white;
+        height: 90px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 50;
+    }
+
+    .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 250px;
+    }
+
+    .topbar-left img { height: 55px; }
+
+    .brand-text {
+        font-weight: 700;
+        font-size: 18px;
+        line-height: 1.2;
+    }
+
+    .brand-tagline {
+        font-size: 14px;
+        opacity: 0.7;
+        font-weight: 500;
+    }
+
+    .topbar-center {
+        flex: 1;
+        text-align: center;
+        font-size: 28px;
+        font-weight: 800;
+    }
+
+    .topbar-right { width: 250px; }
+
+
+    /* ---------- MAIN CONTENT ---------- */
+    .scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 130px 0 140px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .content-card {
+        width: 900px;
+        background: white;
+        padding: 40px 60px 80px;
+        border-radius: 22px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        margin-bottom: 40px;
+        min-height: 900px;
+    }
+
+    /* ----- GRID (2 in row) ------ */
+    .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+        margin-top: 20px;
+    }
+
+    .tile {
+        border: 2px solid #ddd;
+        border-radius: 16px;
+        padding: 22px;
+        cursor: pointer;
+        transition: 0.2s;
+        background: #fafafa;
+        text-align: center;
+position: relative;
+    }
+
+    .tile:hover {
+        border-color: #222;
+        transform: translateY(-3px);
+    }
+
+    .tile.selected {
+        border-color: #4A5F3A;
+        box-shadow: 0 0 10px rgba(0,0,0,0.15);
+    }
+
+    .tile-title {
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .tip-icon {
+        font-size: 20px;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #eee;
+        border: 1px solid #ccc;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        margin-top: 8px;
+    }
+
+   
+
+    /* ---------- BOTTOM BAR ---------- */
+    .bottombar {
+        width: 100%;
+        height: 110px;
+        background: white;
+        box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 50;
+        padding: 10px 40px 0;
+    }
+
+    .bottom-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 50px;
+    }
+
+    .bottom-btn {
+        padding: 12px 26px;
+        background: #111;
+        color: white;
+        border-radius: 14px;
+        font-size: 20px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .bottom-btn.disabled {
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    #nextBtn {
+        margin-right: 120px;
+    }
+
+    .bottom-price {
+        font-size: 26px;
+        font-weight: 700;
+    }
+
+    .progressbar {
+        width: 100%;
+        height: 6px;
+        background: #e5e5e5;
+        border-radius: 4px;
+        margin-top: 10px;
+        overflow: hidden;
+    }
+/* ----- BEAUTIFUL IMAGE TOOLTIP ABOVE TILE ----- */
+/* ---- CENTERED TOOLTIP ---- */
+/* ----- CENTERED FULL-SCREEN IMAGE TOOLTIP ----- */
+.tooltip-bubble {
+    position: fixed;                /* фиксированное = центр окна */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 380px;                   /* шире */
+    max-width: 90vw;
+    background: white;
+    border-radius: 16px;
+    border: 1px solid #ddd;
+    padding: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+
+    display: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+
+    z-index: 9999;                  /* поверх всего */
+}
+
+.tooltip-bubble.show {
+    display: block;
+    opacity: 1;
+}
+
+/* картинка */
+.tooltip-bubble img {
+    width: 100%;
+    border-radius: 12px;
+    display: block;
+}
+
+
+    .progressbar-fill {
+        height: 100%;
+        width: 45%;
+        background: #4A5F3A;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <img src="img/LOGO.png">
+        <div class="brand-text">
+            Accent Wall Calculator<br>
+            <span class="brand-tagline">Modern Design • Professional Installation</span>
+        </div>
+    </div>
+
+    <div class="topbar-center">WALL PREPARATION</div>
+
+    <div class="topbar-right"></div>
+</div>
+
+
+<!-- MAIN CONTENT -->
+<div class="scroll-area">
+<div class="content-card">
+<div style="text-align:center; margin-bottom:35px;">
+    <div style="font-size:28px; font-weight:700; margin-bottom:10px;">
+        Do you want to keep the existing wall texture or make it smooth?
+    </div>
+    <div style="font-size:17px; opacity:0.75; max-width:680px; margin:0 auto;">
+        This step helps us determine how much wall preparation is required before installation.
+    </div>
+</div>
+
+    <div class="grid">
+        <div class="tile" onclick="selectPrep('smooth', this)">
+            <div class="tile-title">Smooth Wall Preparation</div>
+            <div class="tip-icon" onclick="tip(event, 'smooth')">?</div>
+          
+
+        </div>
+
+        <div class="tile" onclick="selectPrep('texture', this)">
+            <div class="tile-title">Keep Existing Wall Texture</div>
+            <div class="tip-icon" onclick="tip(event, 'texture')">?</div>
+        
+
+
+        </div>
+    </div>
+
+</div>
+</div>
+
+
+<!-- BOTTOM BAR -->
+<div class="bottombar">
+    <div class="bottom-row">
+        <div class="bottom-btn" onclick="history.back()">Back</div>
+        <div id="bottomPrice" class="bottom-price">$0</div>
+        <div id="nextBtn" class="bottom-btn disabled" onclick="goNext()">Continue</div>
+    </div>
+
+    <div class="progressbar">
+        <div class="progressbar-fill"></div>
+    </div>
+</div>
+
+<div id="tip_smooth" class="tooltip-bubble">
+    <img src="img/prep_smooth.jpg" alt="">
+</div>
+
+<div id="tip_texture" class="tooltip-bubble">
+    <img src="img/prep_texture.jpg" alt="">
+</div>
+
+<script>
+// ... (ваш JavaScript) ...
+</script>
+<script>
+/* -------------------- COEFFICIENTS -------------------- */
+const PREP_COEF = {
+    smooth: 1.25,
+    texture: 1.0
+};
+
+
+/* -------------------- URL PARAMS -------------------- */
+const params = new URLSearchParams(window.location.search);
+const area = parseFloat(params.get("area"));
+const design = params.get("design");
+const variant = params.get("variant");
+const previousPrice = parseFloat(params.get("price"));
+const zip = params.get("zip") || "";
+const surcharge = parseFloat(params.get("surcharge") || "0");
+
+let selected = null;
+
+
+/* Init price */
+document.getElementById("bottomPrice").textContent = "$" + previousPrice.toFixed(0);
+
+
+/* -------------------- SELECT PREPARATION -------------------- */
+function selectPrep(type, tile) {
+    selected = type;
+
+    document.querySelectorAll(".tile").forEach(t => t.classList.remove("selected"));
+    tile.classList.add("selected");
+
+    const newPrice = previousPrice * PREP_COEF[type];
+    document.getElementById("bottomPrice").textContent = "$" + newPrice.toFixed(0);
+
+    document.getElementById("nextBtn").classList.remove("disabled");
+}
+
+
+/* -------------------- TOOLTIP -------------------- */
+/* -------------------- TOOLTIP -------------------- */
+function tip(e, id) {
+    e.stopPropagation(); // не активирует selectPrep
+
+    const el = document.getElementById("tip_" + id);
+    const isOpen = el.classList.contains("show");
+
+    // 1. Закрыть все остальные подсказки, кроме текущей, без таймаута для display: none
+    document.querySelectorAll(".tooltip-bubble").forEach(t => {
+        if (t !== el) { // Важно: закрываем только другие подсказки
+            t.classList.remove("show");
+            // Здесь не ставим setTimeout, чтобы не было гонки условий.
+            // Вместо этого ставим display: none сразу, так как opacity: 0 уже скрыло ее.
+            t.style.display = "none";
+        }
+    });
+
+    // если эта была открыта — просто закрываем (с анимацией)
+    if (isOpen) {
+        el.classList.remove("show");
+        // Ждем завершения анимации (250ms из CSS + запас)
+        setTimeout(() => el.style.display = "none", 280); 
+        return;
+    }
+
+    // иначе показать её (сначала display: block, затем opacity)
+    el.style.display = "block";
+    setTimeout(() => el.classList.add("show"), 10);
+}
+
+// Закрытие подсказки при клике вне ее или значка '?'
+document.body.addEventListener("click", (e) => {
+    // Если клик был по иконке '?' или внутри самой подсказки, ничего не делаем.
+    if (e.target.closest(".tip-icon") || e.target.closest(".tooltip-bubble")) {
+        return;
+    }
+
+    // Иначе закрываем все подсказки
+    document.querySelectorAll(".tooltip-bubble").forEach(t => {
+        if (t.classList.contains("show")) {
+            t.classList.remove("show");
+            // Устанавливаем display: none только после завершения анимации
+            setTimeout(() => (t.style.display = "none"), 200); 
+        }
+    });
+});
+
+
+
+/* -------------------- CONTINUE -------------------- */
+function goNext() {
+    if (!selected) return;
+
+    const finalPrice = parseFloat(
+        document.getElementById("bottomPrice").textContent.replace("$", "")
+    );
+
+    window.location.href =
+    `step4.html?design=${design}&variant=${variant}&prep=${selected}&area=${area}&price=${finalPrice}&zip=${zip}&surcharge=${surcharge}`;
+
+}
+</script>
+
+</body>
+</html>

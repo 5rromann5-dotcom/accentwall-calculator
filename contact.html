@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Contact Us – Accent Wall Calculator</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background: #f7f7f7;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+.big-cta.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+    /* ---------- TOP BAR ---------- */
+    .topbar {
+        width: 100%;
+        background: white;
+        height: 90px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 50;
+    }
+
+    .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 250px;
+    }
+
+    .topbar-left img {
+        height: 55px;
+    }
+
+    .brand-text {
+        font-weight: 700;
+        font-size: 18px;
+        line-height: 1.2;
+    }
+
+    .brand-tagline {
+        font-size: 14px;
+        opacity: 0.7;
+        font-weight: 500;
+    }
+
+    .topbar-center {
+        flex: 1;
+        text-align: center;
+        font-size: 28px;
+        font-weight: 800;
+    }
+
+    .topbar-right {
+        width: 260px;
+        text-align: right;
+    }
+
+    .contact-btn {
+        font-size: 18px;
+        padding: 10px 22px;
+        border-radius: 14px;
+        border: 1px solid #999;
+        background: #f5f5f5;
+        cursor: pointer;
+    }
+
+    /* ---------- MAIN SCROLL AREA ---------- */
+    .scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 130px 0 140px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .content-card {
+        width: 900px;
+        background: white;
+        padding: 40px 60px 80px;
+        border-radius: 22px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+  min-height: 900px; /* ← ВОТ ЭТО ГЛАВНОЕ */
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 34px;
+        font-weight: 700;
+        margin-bottom: 30px;
+    }
+
+    .form-row {
+        margin-bottom: 26px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    label {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    input, textarea {
+        padding: 14px;
+        font-size: 18px;
+        border-radius: 14px;
+        border: 1px solid #bbb;
+        font-family: inherit;
+    }
+
+    textarea {
+        min-height: 140px;
+        resize: vertical;
+    }
+
+    /* ---------- BUTTON STYLE (как в STEP 6) ---------- */
+    .big-cta {
+        padding: 16px 38px;
+        background: #4A5F3A;
+        color: white;
+        border: none;
+        border-radius: 14px;
+        font-size: 20px;
+        font-weight: 700;
+        cursor: pointer;
+        display: block;
+        margin: 30px auto 0;
+        transition: 0.25s ease;
+    }
+
+    .big-cta:hover {
+        transform: scale(1.03);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.20);
+    }
+
+    /* ---------- BOTTOM BAR ---------- */
+    .bottombar {
+        width: 100%;
+        height: 110px;
+        background: white;
+        box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 50;
+        padding: 25px 40px 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .bottom-msg {
+        font-size: 16px;
+        color: #444;
+        opacity: 0.8;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <img src="img/LOGO.png" alt="Logo">
+        <div class="brand-text">
+            Accent Wall Calculator<br>
+            <span class="brand-tagline">Modern Design • Professional Installation</span>
+        </div>
+    </div>
+
+    <div class="topbar-center">CONTACT OUR TEAM</div>
+
+   
+</div>
+
+
+<!-- MAIN CONTENT -->
+<div class="scroll-area">
+    <div class="content-card">
+
+        <h1>Get in Touch</h1>
+
+        <div class="form-row">
+            <label>Your Name</label>
+            <input id="nameInput" type="text" placeholder="John Doe">
+        </div>
+
+        <div class="form-row">
+            <label>Email</label>
+            <input id="emailInput" type="email" placeholder="your@email.com">
+        </div>
+
+        <div class="form-row">
+            <label>Phone</label>
+            <input id="phoneInput" type="text" placeholder="(512) 555-1234">
+        </div>
+
+        <div class="form-row">
+            <label>ZIP Code</label>
+            <input id="zipInput" type="number" placeholder="78613">
+        </div>
+
+        <div class="form-row">
+            <label>Message</label>
+            <textarea id="msgInput" placeholder="Tell us about your project..."></textarea>
+        </div>
+
+       
+
+    </div>
+</div>
+
+
+<!-- BOTTOM BAR -->
+<div class="bottombar">
+    <button id="sendBtn" class="big-cta disabled" onclick="submitContact()">
+        Send Message
+    </button>
+</div>
+
+
+
+
+<script>
+function validateForm() {
+    const name = document.getElementById("nameInput").value.trim();
+    const email = document.getElementById("emailInput").value.trim();
+    const phone = document.getElementById("phoneInput").value.trim();
+    const zip = document.getElementById("zipInput").value.trim();
+    const msg = document.getElementById("msgInput").value.trim();
+
+    const btn = document.getElementById("sendBtn");
+
+    if (name && email && phone && zip && msg) {
+        btn.classList.remove("disabled");
+    } else {
+        btn.classList.add("disabled");
+    }
+}
+
+// следим за изменениями во всех полях
+document.querySelectorAll("input, textarea").forEach(el => {
+    el.addEventListener("input", validateForm);
+});
+</script>
+
+
+<script>
+async function submitContact() {
+    const btn = document.getElementById("sendBtn");
+    if (btn.classList.contains("disabled")) return;
+
+    // Сбор данных
+    const name = document.getElementById("nameInput").value.trim();
+    const email = document.getElementById("emailInput").value.trim();
+    const phone = document.getElementById("phoneInput").value.trim();
+    const zip = document.getElementById("zipInput").value.trim();
+    const msg = document.getElementById("msgInput").value.trim();
+
+    btn.textContent = "Sending…";
+    btn.classList.add("disabled");
+
+    try {
+        const payload = {
+            name,
+            email,
+            phone,
+            zip,
+            message: msg,
+   requestType: "QUESTION",
+    orderType: "Contact Question",
+            source: "contact_form"
+        };
+
+        await fetch(
+            "https://wallartacwllc.app.n8n.cloud/webhook/accentwall/contact",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }
+        );
+
+        // Скрываем кнопку
+        btn.style.display = "none";
+
+        // Создаём блок как в step6
+        const container = document.querySelector(".content-card");
+
+        const okMsg = document.createElement("div");
+        okMsg.style.marginTop = "20px";
+        okMsg.style.fontSize = "20px";
+        okMsg.style.fontWeight = "700";
+        okMsg.style.textAlign = "center";
+        okMsg.style.color = "#2d7a2d";
+        okMsg.textContent = "Your request has been sent. We’ll be in touch soon.";
+
+        const extraMsg = document.createElement("div");
+        extraMsg.style.marginTop = "10px";
+        extraMsg.style.fontSize = "18px";
+        extraMsg.style.fontWeight = "600";
+        extraMsg.style.textAlign = "center";
+        extraMsg.style.color = "#2d7a2d";
+        extraMsg.textContent = "Our manager will contact you as soon as possible.";
+
+        container.appendChild(okMsg);
+        container.appendChild(extraMsg);
+
+    } catch (err) {
+        btn.textContent = "Send Message";
+        btn.classList.remove("disabled");
+        alert("Error sending message. Please try again.");
+        console.error(err);
+    }
+}
+</script>
+
+
+
+
+</body>
+</html>

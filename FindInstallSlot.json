@@ -1,0 +1,33 @@
+{
+  "parameters": {
+    "calendar": {
+      "__rl": true,
+      "value": "cd8be43ad2758a4d229986dab33f59aa04b0e46d944d0f976435f37dc76d7cc2@group.calendar.google.com",
+      "mode": "list",
+      "cachedResultName": "Installations"
+    },
+    "start": "={{ $json.installDateISO }}T08:00:00",
+    "end": "={{ $json.installDateISO }}T18:00:00",
+    "additionalFields": {
+      "summary": "=Montage for Order {{ $json.OrderID }} (Preliminary)",
+      "description": "=Customer: {{ $json.Email }} / {{ $json.Phone }}\nDuration: {{ $json.durationDays }} working days\nPrice: ${{ $json.Price }}",
+      "recurrence": [
+        "={{ \"RRULE:FREQ=DAILY;COUNT=\" + $json.durationDays + \";BYDAY=MO,TU,WE,TH,FR\" }}"
+      ]
+    }
+  },
+  "id": "CreateEventRecurring",
+  "name": "Create Recurring Installation Event",
+  "type": "n8n-nodes-base.googleCalendar",
+  "typeVersion": 1.3,
+  "position": [
+    1000,
+    -50
+  ],
+  "credentials": {
+    "googleCalendarOAuth2Api": {
+      "id": "vp35UhXRUpkEMmeG",
+      "name": "Google Calendar account"
+    }
+  }
+}

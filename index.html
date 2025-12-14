@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<style>
+  body {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    background: #f7f7f7;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden; /* только горизонтальный скролл блокируем */
+}
+    .contact-btn {
+        font-size: 18px;
+        padding: 10px 22px;
+        border-radius: 14px;
+        border: 1px solid #999;
+        background: #f5f5f5;
+        cursor: pointer;
+    }
+
+    /* ---------- FIXED TOP BAR ---------- */
+    .topbar {
+        width: 100%;
+        background: white;
+        height: 90px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 50;
+    }
+.big-cta {
+    padding: 16px 38px;
+    background: #4A5F3A;
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.25s ease;
+}
+
+.big-cta:hover {
+    transform: scale(1.03);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.20);
+}
+
+    .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 250px;
+    }
+
+    .topbar-left img {
+        height: 55px;
+    }
+
+    .brand-text {
+        font-weight: 700;
+        font-size: 18px;
+        line-height: 1.2;
+    }
+
+    .brand-tagline {
+        font-size: 14px;
+        opacity: 0.7;
+        font-weight: 500;
+    }
+
+    .topbar-center {
+        flex: 1;
+        text-align: center;
+        font-size: 28px;
+        font-weight: 800;
+    }
+    
+    .topbar-right {
+        width: 300px;
+    }
+
+    .bottom-link-btn {
+        font-size: 14px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        border: 1px solid #ccc;
+        background: #fafafa;
+        cursor: pointer;
+    }
+
+    /* ---------- SCROLLABLE MAIN CONTENT ---------- */
+    .scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        padding-top: 130px;
+        padding-bottom: 160px; /* высота bottombar + запас */
+        display: flex;
+        justify-content: center;
+    }
+
+    .content-card {
+        width: 900px;
+        background: white;
+        padding: 40px 60px 80px;
+        border-radius: 22px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        margin-bottom: 40px;
+min-height: 600px; /* или 650–700 если хочешь больше пространства */
+    }
+
+    .image-block img {
+        width: 85%;
+        max-width: 650px;
+        border-radius: 12px;
+        border: 1px solid #ccc;
+        display: block;
+        margin: 0 auto;
+    }
+
+    .row {
+        text-align: center;
+        margin-top: 18px;
+        position: relative;
+    }
+
+    label {
+        font-size: 20px;
+        font-weight: 600;
+        margin-right: 8px;
+    }
+
+    .input-field {
+        width: 180px;
+        padding: 12px;
+        font-size: 20px;
+        border-radius: 12px;
+        border: 1px solid #bbb;
+        text-align: center;
+    }
+
+    /* Tooltip */
+    .tip-wrapper {
+        display: inline-block;
+        position: relative;
+        margin-left: 8px;
+    }
+
+    .tip-icon {
+        font-size: 20px;
+        background: #eee;
+        border-radius: 50%;
+        width: 26px;
+        height: 26px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #ccc;
+        cursor: pointer;
+    }
+
+    .tooltip-bubble {
+        position: absolute;
+        top: 50%;
+        left: 34px;
+        transform: translateY(-50%);
+        background: white;
+        padding: 12px 16px;
+        border-radius: 12px;
+        border: 1px solid #ddd;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.12);
+        width: 240px;
+        font-size: 15px;
+        display: none;
+        z-index: 100;
+        text-align: left;
+    }
+
+    .area-box {
+        margin-top: 30px;
+        font-size: 24px;
+        font-weight: 700;
+        padding: 18px 30px;
+        background: #f1f1f1;
+        border-radius: 16px;
+        display: inline-block;
+    }
+
+    /* ---------- FIXED BOTTOM BAR ---------- */
+    .bottombar {
+        width: 100%;
+        height: 110px;
+        background: white;
+        box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 50;
+        padding: 10px 40px 0;
+    }
+
+    .bottom-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 50px;
+    }
+
+    .bottom-btn {
+        padding: 12px 26px;
+        background: #111;
+        color: white;
+        border-radius: 14px;
+        font-size: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        opacity: 1;
+    }
+
+    .bottom-btn.disabled {
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    #nextBtn {
+        margin-right: 120px;
+    }
+
+    .bottom-price {
+        font-size: 22px;
+        font-weight: 700;
+        opacity: 0;
+        transition: 0.3s;
+    }
+
+    /* Progress bar */
+    .progressbar {
+        width: 100%;
+        height: 6px;
+        background: #e5e5e5;
+        border-radius: 4px;
+        margin-top: 10px;
+        overflow: hidden;
+    }
+
+    .progressbar-fill {
+        height: 100%;
+        background: #4A5F3A;
+        width: 15%;
+        transition: width 0.3s;
+    }
+<button id="howBtn" style="
+    padding: 14px 32px;
+    background:#4A5F3A;
+    color:white;
+    border:none;
+    border-radius:14px;
+    font-size:19px;
+    font-weight:700;
+    cursor:pointer;
+">How it works</button>
+
+
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <div class="topbar-left">
+        <img src="img/LOGO.png" alt="Logo">
+        <div class="brand-text">
+            Accent Wall Calculator<br>
+            <span class="brand-tagline">Modern Design • Professional Installation</span>
+        </div>
+    </div>
+
+    <div class="topbar-center">ENTER YOUR WALL DIMENSIONS</div>
+    
+    <div class="topbar-right" style="width: 300px; text-align:left;">
+        <button class="contact-btn" onclick="window.location.href='/contact.html'">
+            Contact Us
+        </button>
+    </div>
+</div>
+
+<div class="scroll-area">
+    <div class="content-card">
+
+        <div class="image-block">
+            <img src="img/1HW.png" alt="Wall Preview">
+        </div>
+
+        <div class="row">
+            <label>Wall Height (ft)</label>
+            <input id="heightInput" class="input-field" type="number" min="1" oninput="updateArea()">
+
+            <span class="tip-wrapper">
+                <span class="tip-icon" onclick="toggleTip('t1')">?</span>
+                <div id="t1" class="tooltip-bubble">Enter the full height of your accent wall.</div>
+            </span>
+        </div>
+
+        <div class="row">
+            <label>Wall Width (ft)</label>
+            <input id="widthInput" class="input-field" type="number" min="1" oninput="updateArea()">
+
+            <span class="tip-wrapper">
+                <span class="tip-icon" onclick="toggleTip('t2')">?</span>
+                <div id="t2" class="tooltip-bubble">Enter the full width of your wall.</div>
+            </span>
+        </div>
+
+        <div class="row" style="margin-top:25px;">
+            <label>ZIP Code</label>
+            <input id="zipInput" class="input-field" type="number" placeholder="78613" oninput="updateZip()">
+        </div>
+
+        <div class="row">
+            <div id="areaBox" class="area-box">Your wall is: 0 sq ft</div>
+        </div>
+<div class="row" style="margin-top:25px; text-align:center;">
+    <button class="big-cta" id="howBtn">How it works</button>
+
+</div>
+
+    </div>
+</div>
+
+<div class="bottombar">
+    <div class="bottom-row">
+        <div class="bottom-btn" style="visibility:hidden;">Back</div>
+
+        <div id="bottomPrice" class="bottom-price" style="opacity:0;"></div>
+
+        <div id="nextBtn" class="bottom-btn disabled">
+            Continue
+        </div>
+    </div>
+
+    <div class="progressbar">
+        <div class="progressbar-fill"></div>
+    </div>
+</div>
+
+<script>
+/* ---------- ZIP SURCHARGE (ГЛОБАЛЬНО) ---------- */
+function getZipSurcharge(zip) {
+    const z = parseInt(zip, 10);
+    if (!z) return 0;
+
+    // Примерные зоны — потом заменишь
+    if (z >= 78600 && z < 78650) return 0;    // локально — без доплаты
+    if (z >= 78700 && z < 78760) return 75;   // Остин
+    if (z >= 78500 && z < 78599) return 150;  // дальняя зона
+    return 200;                               // все остальные ZIP
+}
+
+/* ---------- TOOLTIP ---------- */
+function toggleTip(id) {
+    const el = document.getElementById(id);
+    const visible = el.style.display === "block";
+    document.querySelectorAll(".tooltip-bubble").forEach(b => b.style.display = "none");
+    el.style.display = visible ? "none" : "block";
+}
+
+/* ---------- ZIP INPUT ---------- */
+function updateZip() {
+    const zip = document.getElementById("zipInput").value.trim();
+    localStorage.setItem("zip", zip);
+    // При изменении ZIP сразу проверяем форму (и при необходимости активируем кнопку)
+    updateArea();
+}
+
+/* ---------- CALCULATE AREA + ENABLE NEXT ---------- */
+function updateArea() {
+    const hInput = document.getElementById("heightInput");
+    const wInput = document.getElementById("widthInput");
+    const zipInput = document.getElementById("zipInput");
+    const next = document.getElementById("nextBtn");
+
+    if (!hInput || !wInput || !zipInput) return;
+
+    const h = parseFloat(hInput.value);
+    const w = parseFloat(wInput.value);
+    const zip = zipInput.value.trim();
+
+    // Валидируем ТРИ поля: высота, ширина, ZIP
+    if (!h || !w || h <= 0 || w <= 0 || zip.length < 5) {
+        next.classList.add("disabled");
+        return;
+    }
+
+    // Обновляем площадь
+    const area = (h * w).toFixed(1);
+    document.getElementById("areaBox").textContent = `Your wall is: ${area} sq ft`;
+
+    // Доп. логика высоты
+    let heightLevel = 0;
+    if (h > 10 && h <= 16) heightLevel = 1;
+    if (h > 16) heightLevel = 2;
+
+    // Сохраняем значения
+    localStorage.setItem("wallHeight", h);
+    localStorage.setItem("wallWidth", w);
+    localStorage.setItem("wallArea", area);
+    localStorage.setItem("heightLevel", heightLevel);
+    localStorage.setItem("zip", zip);
+
+    // Все валидно → позволяем перейти дальше
+    next.classList.remove("disabled");
+}
+
+/* ---------- NAVIGATION ---------- */
+document.getElementById("nextBtn").onclick = () => {
+    const btn = document.getElementById("nextBtn");
+    if (btn.classList.contains("disabled")) return;
+
+    const area = localStorage.getItem("wallArea");
+    const zip = localStorage.getItem("zip") || "";
+    const surcharge = getZipSurcharge(zip);
+
+    window.location.href =
+        `step2.html?area=${area}&zip=${zip}&surcharge=${surcharge}`;
+};
+</script>
+<!-- HOW IT WORKS MODAL -->
+<div id="howBackdrop" style="
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: none;
+    z-index: 9998;
+"></div>
+
+<div id="howBox" style="
+    position: fixed;
+    top: calc(60% + 20px);
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 520px;
+    max-width: 94vw;
+    background: white;
+    padding: 24px;
+    border-radius: 18px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.28);
+    display: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 9999;
+">
+
+    <div style="
+    font-size:26px;
+    font-weight:800;
+    text-align:center;
+    margin-bottom:18px;
+">
+    How this process works
+</div>
+
+    <div style="white-space: pre-line; font-size: 16px; line-height: 2;">
+1. You need to fill out this form. IT IS VERY SIMPLE.
+If you have any questions while completing the form, just click Contact Us on the first page.
+At the end of the process, you will receive an ACCURATE price and an estimated installation date based on our team’s current workload.
+
+2. Our manager will contact you to discuss the details of your order and prepare the contract.
+
+3. You will make a deposit, and we will begin preparing for the project.
+
+4. We will complete the installation professionally and with high quality.
+</div>
+
+    <img src="img/how_it_works_placeholder.jpg" alt="How it works" style="width:100%; border-radius:12px; margin-top:10px;">
+
+    <div style="text-align:right; margin-top:12px;">
+        <button id="howCloseBtn" style="
+            padding: 10px 22px;
+            border-radius:14px;
+            background:white;
+            border:1px solid #444;
+            cursor:pointer;
+        ">Close</button>
+    </div>
+</div>
+<script>
+const howBtn = document.getElementById("howBtn");
+const howBackdrop = document.getElementById("howBackdrop");
+const howBox = document.getElementById("howBox");
+const howCloseBtn = document.getElementById("howCloseBtn");
+
+function openHow() {
+    howBackdrop.style.display = "block";
+    howBox.style.display = "block";
+    setTimeout(() => howBox.style.opacity = "1", 10);
+}
+
+function closeHow() {
+    howBox.style.opacity = "0";
+    setTimeout(() => {
+        howBox.style.display = "none";
+        howBackdrop.style.display = "none";
+    }, 220);
+}
+
+howBtn.onclick = openHow;
+howCloseBtn.onclick = closeHow;
+howBackdrop.onclick = closeHow;
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Accent Wall – Step 6</title>
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background: #f7f7f7;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    /* ---------- TOP BAR ---------- */
+    .topbar {
+        width: 100%;
+        background: white;
+        height: 90px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 50;
+    }
+
+    .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 250px;
+    }
+
+    .topbar-left img {
+        height: 55px;
+    }
+
+    .brand-text {
+        font-weight: 700;
+        font-size: 18px;
+        line-height: 1.2;
+    }
+
+    .brand-tagline {
+        font-size: 14px;
+        opacity: 0.7;
+        font-weight: 500;
+    }
+
+    .topbar-center {
+        flex: 1;
+        text-align: center;
+        font-size: 28px;
+        font-weight: 800;
+    }
+
+    .topbar-right {
+        width: 250px;
+        text-align: right;
+    }
+
+    /* ---------- MAIN CONTENT ---------- */
+    .scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 130px 0 140px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .content-card {
+        width: 1000px;
+        background: white;
+        padding: 40px 60px 80px;
+        border-radius: 22px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        margin-bottom: 40px;
+        min-height: 1200px; /* больше высота, чтобы всё влезало */
+    }
+
+    .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 18px;
+    }
+
+    .summary-layout {
+        display: grid;
+        grid-template-columns: 2fr 1.4fr;
+        gap: 32px;
+        margin-bottom: 30px;
+        align-items: flex-start;
+    }
+
+    .summary-box {
+        border: 1px solid #e0e0e0;
+        border-radius: 16px;
+        padding: 20px 24px;
+        background: #fafafa;
+    }
+
+    .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 5px 0;
+        border-bottom: 1px dashed #e1e1e1;
+        font-size: 15px;
+    }
+
+    .summary-row:last-child {
+        border-bottom: none;
+    }
+
+    .summary-label {
+        font-weight: 600;
+        color: #555;
+        margin-right: 10px;
+    }
+
+    .summary-value {
+        text-align: right;
+        color: #222;
+        font-weight: 500;
+    }
+
+    .price-box {
+        border-radius: 16px;
+        border: 1px solid #e0e0e0;
+        padding: 22px 24px;
+        background: #f6f8f4;
+    }
+
+    .price-line-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .price-value {
+        font-size: 26px;
+        font-weight: 800;
+        margin-bottom: 14px;
+    }
+
+    .install-line {
+        font-size: 15px;
+        font-weight: 500;
+        margin-top: 4px;
+    }
+
+    /* ---------- CTA BUTTONS ---------- */
+    .primary-btn,
+    .secondary-btn,
+    .outline-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 26px;
+        border-radius: 14px;
+        font-size: 18px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        text-decoration: none;
+    }
+
+    .primary-btn {
+        background: #111;
+        color: white;
+    }
+
+    .secondary-btn {
+        background: #4A5F3A;
+        color: white;
+    }
+
+    .outline-btn {
+        background: transparent;
+        border: 1px solid #444;
+        color: #222;
+    }
+
+    .primary-btn.disabled,
+    .secondary-btn.disabled {
+        opacity: 0.35;
+        pointer-events: none;
+    }
+
+    .cta-centered {
+        text-align: center;
+        margin: 24px 0;
+    }
+
+    .big-cta {
+        padding: 14px 32px;
+        border-radius: 18px;
+        font-size: 19px;
+        font-weight: 700;
+    }
+
+    
+
+    /* ---------- SECTIONS BELOW SUMMARY ---------- */
+    .question-block {
+        text-align: center;
+        margin-top: 30px;
+        margin-bottom: 10px;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .small-note {
+        text-align: center;
+        font-size: 14px;
+        opacity: 0.8;
+        margin-top: 4px;
+    }
+
+    .choice-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 18px;
+        margin-top: 12px;
+        margin-bottom: 8px;
+    }
+
+    .pill-btn {
+        padding: 10px 26px;
+        border-radius: 999px;
+        border: 1px solid #ccc;
+        background: #f5f5f5;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: 600;
+        min-width: 120px;
+        text-align: center;
+    }
+
+    .pill-btn.selected {
+        border-color: #111;
+        background: #111;
+        color: white;
+    }
+
+    /* Email section */
+    .flow-section {
+        max-width: 520px;
+        margin: 30px auto 0;
+        text-align: center;
+    }
+
+    .flow-section h3 {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    .flow-section p {
+        margin: 0 0 10px;
+        font-size: 15px;
+        opacity: 0.85;
+    }
+
+    .text-input {
+        width: 100%;
+        padding: 11px 13px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        font-size: 15px;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+
+    .helper-text {
+        font-size: 13px;
+        opacity: 0.75;
+        margin-top: 4px;
+        text-align: left;
+    }
+
+    /* Communication section */
+    .comm-options {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-top: 10px;
+    }
+
+    .comm-btn {
+        padding: 8px 22px;
+        border-radius: 999px;
+        border: 1px solid #ccc;
+        background: #f7f7f7;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: 600;
+    }
+
+    .comm-btn.selected {
+        background: #111;
+        color: white;
+        border-color: #111;
+    }
+
+    .phone-wrapper {
+        margin-top: 15px;
+        text-align: left;
+    }
+
+    .phone-wrapper label {
+        font-size: 14px;
+        font-weight: 600;
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .status-message {
+        text-align: center;
+        margin-top: 12px;
+        font-size: 14px;
+    }
+
+    .status-ok {
+        color: #2d7a2d;
+    }
+
+    .status-error {
+        color: #b42626;
+    }
+
+    /* Another wall section */
+    .another-wrapper {
+        margin-top: 28px;
+        border-top: 1px dashed #ddd;
+        padding-top: 18px;
+    }
+
+    /* ---------- BOTTOM BAR ---------- */
+    .bottombar {
+        width: 100%;
+        height: 90px;
+        background: white;
+        box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 50;
+        padding: 10px 40px 0;
+    }
+
+    .bottom-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 50px;
+    }
+
+    .bottom-links {
+        display: flex;
+        gap: 14px;
+    }
+
+    .bottom-link-btn {
+        font-size: 14px;
+        padding: 6px 14px;
+        border-radius: 999px;
+        border: 1px solid #ccc;
+        background: #fafafa;
+        cursor: pointer;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <img src="img/LOGO.png" alt="Logo">
+        <div class="brand-text">
+            Accent Wall Calculator<br>
+            <span class="brand-tagline">Modern Design • Professional Installation</span>
+        </div>
+    </div>
+
+    <div class="topbar-center">SUMMARY & BOOKING</div>
+
+    <div class="topbar-right"></div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="scroll-area">
+    <div class="content-card">
+
+        <div class="section-title">Your Accent Wall Summary</div>
+
+        <div class="summary-layout">
+            <!-- LEFT: SUMMARY LIST -->
+            <div class="summary-box">
+                <div class="summary-row">
+                    <div class="summary-label">Design</div>
+                    <div class="summary-value" id="sumDesign">—</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-label">Variant</div>
+                    <div class="summary-value" id="sumVariant">—</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-label">Preparation</div>
+                    <div class="summary-value" id="sumPrep">—</div>
+                </div>
+                <div class="summary-row">
+                    <div class="summary-label">Finish</div>
+                    <div class="summary-value" id="sumFinish">—</div>
+                </div>
+
+                <div class="summary-row" id="rowPrimaryColor">
+                    <div class="summary-label">Primary color</div>
+                    <div class="summary-value" id="sumColorPrimary">—</div>
+                </div>
+
+                <div class="summary-row" id="rowSecondaryColor">
+                    <div class="summary-label">Secondary color</div>
+                    <div class="summary-value" id="sumColorSecondary">—</div>
+                </div>
+
+                <div class="summary-row">
+                    <div class="summary-label">Wall area</div>
+                    <div class="summary-value" id="sumArea">—</div>
+                </div>
+
+                <div class="summary-row">
+                    <div class="summary-label">Width × Height</div>
+                    <div class="summary-value" id="sumSize">—</div>
+                </div>
+
+                <div class="summary-row">
+                    <div class="summary-label">ZIP code</div>
+                    <div class="summary-value" id="sumZip">—</div>
+                </div>
+            </div>
+
+            <!-- RIGHT: PRICE / DATE / DURATION -->
+            <div class="price-box">
+                <div class="price-line-title">Total price</div>
+                <div class="price-value" id="priceBox">$0.00</div>
+
+                <div class="install-line" id="installDate">
+                    Estimated installation date: Calculating…
+                </div>
+                <div class="install-line" id="durationBox">
+                    Estimated installation duration: Calculating…
+                </div>
+            </div>
+        </div>
+
+        <!-- HOW IT WORKS BUTTON -->
+        <div class="cta-centered">
+            <button class="secondary-btn big-cta" id="howBtn">How it works</button>
+        </div>
+
+        <!-- CONTINUE QUESTION -->
+        <div class="question-block">
+            Would you like to continue with your order?
+        </div>
+        <div class="choice-buttons">
+            <div class="pill-btn" id="btnContinueYes">Yes</div>
+            <div class="pill-btn" id="btnContinueNo">No</div>
+        </div>
+        <div class="small-note" id="continueNote">
+            You’re not committing to anything yet — this just helps us prepare your quote.
+        </div>
+
+        <div class="status-message" id="thankMessage" style="display:none;">
+            Thank you! Your configuration is saved. You can close this page at any time.
+        </div>
+
+        <!-- EMAIL SECTION (hidden initially) -->
+        <div class="flow-section" id="emailSection" style="display:none;">
+            <h3>Please enter your email</h3>
+            <p>We’ll send you a detailed quote and next steps.</p>
+            <input id="emailInput" type="email" class="text-input" placeholder="your@email.com">
+            <div class="helper-text">
+                We will never share your email with third parties.
+            </div>
+        </div>
+
+        <!-- COMMUNICATION SECTION -->
+        <div class="flow-section" id="commSection" style="display:none;">
+            <h3>How would you prefer to communicate?</h3>
+            <p>You can choose email, phone, or both — whatever works best for you.</p>
+
+            <div class="comm-options">
+                <button type="button" id="commEmail" class="comm-btn selected">By Email</button>
+                <button type="button" id="commPhone" class="comm-btn">By Phone</button>
+            </div>
+
+            <div class="phone-wrapper" id="phoneWrapper" style="display:none;">
+                <label for="phoneInput">Phone number</label>
+                <input id="phoneInput" type="tel" class="text-input" placeholder="+1 (555) 123-4567">
+            </div>
+
+            <div class="cta-centered" style="margin-top:20px;">
+                <button id="confirmCommBtn" class="primary-btn big-cta">
+                    Confirm 
+                </button>
+            </div>
+
+            <div class="status-message" id="crmStatus"></div>
+        </div>
+
+        <!-- SEND INVOICE BUTTON (after CRM OK) -->
+        <div class="cta-centered" id="invoiceSection" style="display:none;">
+            <button id="sendInvoiceBtn" class="secondary-btn big-cta">
+                Send invoice to email
+            </button>
+            <div class="small-note">
+                You’ll receive a PDF-style estimate with all selected options.
+            </div>
+        </div>
+
+        <!-- ANOTHER WALL SECTION -->
+        <div class="flow-section another-wrapper" id="anotherSection" style="display:none;">
+            <h3>Would you like to calculate another wall?</h3>
+            <div class="choice-buttons">
+                <div class="pill-btn" id="btnAnotherYes">Yes</div>
+                <div class="pill-btn" id="btnAnotherNo">No</div>
+            </div>
+            <div class="small-note">
+                If you choose “Yes”, we’ll take you back to the first step and keep your contact details.
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottombar">
+    <div class="bottom-row">
+        <div class="bottom-links">
+            <button class="bottom-link-btn" onclick="window.location.href='/faq.html'">
+                Frequently Asked Questions
+            </button>
+            <button class="bottom-link-btn" onclick="window.location.href='/contact.html'">
+                Contact Us
+            </button>
+        </div>
+
+        <!-- Место под что-то ещё, если понадобится -->
+        <div></div>
+    </div>
+</div>
+
+<!-- HOW IT WORKS MODAL -->
+<!-- HOW IT WORKS MODAL -->
+<div id="howBackdrop" style="
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: none;
+    z-index: 9998;
+"></div>
+
+<div id="howBox" style="
+    position: fixed;
+    top: calc(60% + 20px);
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 520px;
+    max-width: 94vw;
+    background: white;
+    padding: 24px;
+    border-radius: 18px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.28);
+    display: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 9999;
+">
+    <div style="
+        font-size:26px;
+        font-weight:800;
+        text-align:center;
+        margin-bottom:18px;
+    ">
+        How this process works
+    </div>
+
+    <div style="white-space: pre-line; font-size: 16px; line-height: 2;">
+1. You need to fill out this form. IT IS VERY SIMPLE.
+If you have any questions while completing the form, just click Contact Us on the first page.
+At the end of the process, you will receive an ACCURATE price and an estimated installation date based on our team’s current workload.
+
+2. Our manager will contact you to discuss the details of your order and prepare the contract.
+
+3. You will make a deposit, and we will begin preparing for the project.
+
+4. We will complete the installation professionally and with high quality.
+    </div>
+
+    <img src="img/how_it_works_placeholder.jpg" alt="How it works" style="width:100%; border-radius:12px; margin-top:10px;">
+
+    <div style="text-align:right; margin-top:12px;">
+        <button id="howCloseBtn" style="
+            padding: 10px 22px;
+            border-radius:14px;
+            background:white;
+            border:1px solid #444;
+            cursor:pointer;
+        ">Close</button>
+    </div>
+</div>
+
+
+<script>
+/* ========== URL PARAMS & COLLECTED DATA ========== */
+const urlParams = new URLSearchParams(window.location.search);
+
+const collected = {
+    design: urlParams.get("design") || "",
+    variant: urlParams.get("variant") || "",
+    prep: urlParams.get("prep") || "",
+    finish: urlParams.get("finish") || "",
+    paint_mode: urlParams.get("paint_mode") || "",
+    color_primary: urlParams.get("color_primary") || "",
+    color_secondary: urlParams.get("color_secondary") || "",
+    area: parseFloat(urlParams.get("area") || "0") || 0,
+    width: localStorage.getItem("wallWidth") || urlParams.get("width") || "",
+    height: localStorage.getItem("wallHeight") || urlParams.get("height") || "",
+    zip: urlParams.get("zip") || "",
+    price: parseFloat(urlParams.get("price") || "0") || 0,
+
+    email: "",
+    phone: "",
+    method: "",
+
+    installDateISO: "",
+    installDateText: "",
+    installDuration: 0
+};
+
+/* ========== INIT SUMMARY UI ========== */
+function mapPaintMode(mode) {
+    switch (mode) {
+        case "one": return "Paint — one color";
+        case "multi": return "Paint — multiple colors";
+        case "partial": return "Paint — partial colors";
+        case "wood_paint": return "Solid wood + paint";
+        case "wood": return "Solid wood (no paint)";
+        default: return mode || "—";
+    }
+}
+
+function initSummary() {
+    document.getElementById("sumDesign").textContent = collected.design || "—";
+    document.getElementById("sumVariant").textContent = collected.variant || "—";
+    document.getElementById("sumPrep").textContent = collected.prep || "—";
+    document.getElementById("sumFinish").textContent = mapPaintMode(collected.paint_mode);
+
+    const rowPrimary = document.getElementById("rowPrimaryColor");
+    const rowSecondary = document.getElementById("rowSecondaryColor");
+
+    if (collected.paint_mode === "wood") {
+        rowPrimary.style.display = "none";
+        rowSecondary.style.display = "none";
+    } else {
+        if (collected.color_primary && collected.color_primary !== "null") {
+            document.getElementById("sumColorPrimary").textContent = collected.color_primary;
+        } else {
+            rowPrimary.style.display = "none";
+        }
+
+        if (collected.color_secondary && collected.color_secondary !== "null") {
+            document.getElementById("sumColorSecondary").textContent = collected.color_secondary;
+        } else {
+            rowSecondary.style.display = "none";
+        }
+    }
+
+    document.getElementById("sumArea").textContent =
+        collected.area ? collected.area.toFixed(1) + " sq.ft" : "—";
+
+    if (collected.width && collected.height) {
+        document.getElementById("sumSize").textContent =
+            collected.width + " ft × " + collected.height + " ft";
+    } else {
+        document.getElementById("sumSize").textContent = "—";
+    }
+
+    document.getElementById("sumZip").textContent = collected.zip || "—";
+
+    document.getElementById("priceBox").textContent =
+        "$" + collected.price.toFixed(2);
+}
+
+/* ========== HOW IT WORKS MODAL ========== */
+/* ========== HOW IT WORKS MODAL ========== */
+const howBtn = document.getElementById("howBtn");
+const howBackdrop = document.getElementById("howBackdrop");
+const howBox = document.getElementById("howBox");
+const howCloseBtn = document.getElementById("howCloseBtn");
+
+function openHow() {
+    howBackdrop.style.display = "block";
+    howBox.style.display = "block";
+    setTimeout(() => howBox.style.opacity = "1", 10);
+}
+
+function closeHow() {
+    howBox.style.opacity = "0";
+    setTimeout(() => {
+        howBox.style.display = "none";
+        howBackdrop.style.display = "none";
+    }, 220);
+}
+
+howBtn.addEventListener("click", openHow);
+howCloseBtn.addEventListener("click", closeHow);
+howBackdrop.addEventListener("click", closeHow);
+
+
+/* ========== SLOT WEBHOOK (DATE & DURATION) ========== */
+// базовый расчёт длительности, если n8n не вернёт своё значение
+collected.installDuration = Math.max(
+    1,
+    Math.ceil(collected.price / 800)
+);
+
+async function findInstallSlot() {
+    const installDateEl = document.getElementById("installDate");
+    const durationEl = document.getElementById("durationBox");
+
+    try {
+        const response = await fetch(
+            "https://wallartacwllc.app.n8n.cloud/webhook/accentwall/slot",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+    zip: collected.zip,
+    area: collected.area,
+    design: collected.design,
+    variant: collected.variant,
+    prep: collected.prep,
+    finish: collected.price,
+    width: collected.width,
+    height: collected.height,
+    installDuration: collected.installDuration   // ← ДОБАВИТЬ
+})
+            }
+        );
+
+        const data = await response.json();
+        console.log("Slot response:", data);
+
+collected.installDateISO =
+    data.installDateISO || data.dateISO || data.date || "";
+collected.installDateText =
+    data.installDateText || data.dateText || data.prettyDate || "";
+
+// если n8n вернул свою длительность – используем её,
+// если нет – оставляем то, что посчитали на фронте (price/800)
+const durationFromServer =
+    data.installDuration || data.durationDays || data.duration;
+
+if (durationFromServer) {
+    collected.installDuration = durationFromServer;
+}
+
+
+        if (collected.installDateText) {
+            installDateEl.textContent =
+                "Estimated installation date: " + collected.installDateText;
+        } else if (collected.installDateISO) {
+            installDateEl.textContent =
+                "Estimated installation date: " + collected.installDateISO;
+        } else {
+            installDateEl.textContent =
+                "Estimated installation date: Our manager will confirm by email.";
+        }
+
+        durationEl.textContent =
+            "Estimated installation duration: " +
+            collected.installDuration +
+            " day(s)";
+    } catch (err) {
+        console.error("Slot error:", err);
+        installDateEl.textContent =
+            "Estimated installation date: Our manager will confirm by email.";
+        durationEl.textContent =
+            "Estimated installation duration: Will be clarified.";
+    }
+}
+
+/* ========== CONTINUE YES/NO LOGIC ========== */
+const btnContinueYes = document.getElementById("btnContinueYes");
+const btnContinueNo = document.getElementById("btnContinueNo");
+const thankMessage = document.getElementById("thankMessage");
+const emailSection = document.getElementById("emailSection");
+const commSection = document.getElementById("commSection");
+const continueNote = document.getElementById("continueNote");
+
+btnContinueYes.onclick = () => {
+    btnContinueYes.classList.add("selected");
+    btnContinueNo.classList.remove("selected");
+    thankMessage.style.display = "none";
+
+    // Показать email секцию
+    emailSection.style.display = "block";
+    // Коммуникация появится чуть позже — после заполнения email
+};
+
+btnContinueNo.onclick = () => {
+    btnContinueNo.classList.add("selected");
+    btnContinueYes.classList.remove("selected");
+    emailSection.style.display = "none";
+    commSection.style.display = "none";
+    document.getElementById("invoiceSection").style.display = "none";
+
+    thankMessage.style.display = "block";
+    continueNote.style.display = "none";
+
+    // Показываем вопрос про другую стену
+    document.getElementById("anotherSection").style.display = "block";
+};
+
+/* ========== EMAIL & COMMUNICATION LOGIC ========== */
+const emailInput = document.getElementById("emailInput");
+const commEmail = document.getElementById("commEmail");
+const commPhone = document.getElementById("commPhone");
+const phoneWrapper = document.getElementById("phoneWrapper");
+const phoneInput = document.getElementById("phoneInput");
+const confirmCommBtn = document.getElementById("confirmCommBtn");
+const crmStatus = document.getElementById("crmStatus");
+
+let emailSelected = true;
+let phoneSelected = false;
+let crmSent = false;
+
+/* Появление блока коммуникации после ввода нормального email */
+emailInput.addEventListener("input", () => {
+    const value = emailInput.value.trim();
+    collected.email = value;
+
+    // простая проверка вида
+    const looksValid = value.includes("@") && value.includes(".");
+    if (looksValid) {
+        commSection.style.display = "block";
+    } else {
+        commSection.style.display = "none";
+    }
+});
+
+/* Переключатели Email / Phone */
+commEmail.onclick = () => {
+    emailSelected = !emailSelected;
+    if (emailSelected) {
+        commEmail.classList.add("selected");
+    } else {
+        commEmail.classList.remove("selected");
+    }
+};
+
+commPhone.onclick = () => {
+    phoneSelected = !phoneSelected;
+    if (phoneSelected) {
+        commPhone.classList.add("selected");
+        phoneWrapper.style.display = "block";
+    } else {
+        commPhone.classList.remove("selected");
+        phoneWrapper.style.display = "none";
+    }
+};
+
+function validateComm() {
+    crmStatus.textContent = "";
+    crmStatus.className = "status-message";
+
+    if (!collected.email || !collected.email.includes("@")) {
+        crmStatus.textContent = "Please enter a valid email address.";
+        crmStatus.classList.add("status-error");
+        return false;
+    }
+
+    if (!emailSelected && !phoneSelected) {
+        crmStatus.textContent = "Please select at least one communication method.";
+        crmStatus.classList.add("status-error");
+        return false;
+    }
+
+    if (phoneSelected) {
+        const phoneVal = phoneInput.value.trim();
+        if (!phoneVal) {
+            crmStatus.textContent = "Please enter your phone number or disable phone communication.";
+            crmStatus.classList.add("status-error");
+            return false;
+        }
+        collected.phone = phoneVal;
+    } else {
+        collected.phone = "";
+    }
+
+    const methods = [];
+    if (emailSelected) methods.push("email");
+    if (phoneSelected) methods.push("phone");
+    collected.method = methods.join(", ");
+
+    return true;
+}
+
+/* ========== CRM WEBHOOK (ORDER) ========== */
+async function sendOrderToCRM(extraPayload = {}) {
+    const payload = {
+        ...collected,
+        ...extraPayload
+    };
+
+    try {
+        const response = await fetch(
+            "https://wallartacwllc.app.n8n.cloud/webhook/accentwall/order",
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }
+        );
+
+        const text = await response.text();
+        console.log("CRM response:", text);
+
+        crmStatus.textContent = "Your request has been sent. We’ll be in touch soon.";
+        crmStatus.classList.remove("status-error");
+        crmStatus.classList.add("status-ok");
+
+        crmSent = true;
+// EXTRA MESSAGE FOR USER
+const extraMsg = document.createElement("div");
+extraMsg.style.marginTop = "12px";
+extraMsg.style.fontSize = "20px";
+extraMsg.style.fontWeight = "700";
+extraMsg.style.textAlign = "center";
+extraMsg.style.color = "#2d7a2d";
+extraMsg.textContent = "Our manager will contact you as soon as possible.";
+
+crmStatus.insertAdjacentElement("afterend", extraMsg);
+
+        // показать кнопку инвойса и вопрос про другую стену
+        document.getElementById("invoiceSection").style.display = "block";
+        document.getElementById("anotherSection").style.display = "block";
+    } catch (err) {
+        console.error("CRM error:", err);
+        crmStatus.textContent = "Something went wrong. Please try again later.";
+        crmStatus.classList.add("status-error");
+    }
+}
+
+/* Подтверждение метода коммуникации → отправка в CRM */
+confirmCommBtn.onclick = () => {
+    if (!validateComm()) return;
+    if (crmSent) {
+        crmStatus.textContent = "Your preferences are already saved.";
+        crmStatus.classList.remove("status-error");
+        crmStatus.classList.add("status-ok");
+        return;
+    }
+    sendOrderToCRM({ source: "accentwall_calculator" });
+};
+
+/* Кнопка отправить инвойс на email (повторная отправка с флагом) */
+const sendInvoiceBtn = document.getElementById("sendInvoiceBtn");
+sendInvoiceBtn.onclick = () => {
+    if (!collected.email) {
+        crmStatus.textContent = "Please enter your email first.";
+        crmStatus.classList.add("status-error");
+        return;
+    }
+    sendOrderToCRM({ sendInvoiceOnly: true });
+};
+
+/* ========== ANOTHER WALL LOGIC ========== */
+const btnAnotherYes = document.getElementById("btnAnotherYes");
+const btnAnotherNo = document.getElementById("btnAnotherNo");
+
+btnAnotherYes.onclick = () => {
+    // на твой выбор: index.html / step1.html / step2.html
+    window.location.href = "index.html";
+};
+
+btnAnotherNo.onclick = () => {
+    btnAnotherNo.classList.add("selected");
+    btnAnotherYes.classList.remove("selected");
+    // просто сообщение, оставить на странице
+    crmStatus.textContent = "Thank you! We’ve saved your project details.";
+    crmStatus.classList.remove("status-error");
+    crmStatus.classList.add("status-ok");
+};
+
+/* ========== INIT ON LOAD ========== */
+window.addEventListener("DOMContentLoaded", () => {
+    initSummary();
+
+
+    findInstallSlot();
+});
+</script>
+
+</body>
+</html>
+

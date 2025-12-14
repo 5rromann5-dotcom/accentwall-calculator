@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+
+<style>
+    body {
+        margin: 0;
+        font-family: "Inter", sans-serif;
+        background: #f7f7f7;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+/* ----- CENTERED TEXT TOOLTIP (like step2 variant) ----- */
+.color-tip-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: none;
+    z-index: 9998;
+}
+
+.color-tip-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 380px;
+    max-width: 90vw;
+
+    background: white;
+    padding: 22px;
+    border-radius: 14px;
+    border: 1px solid #ddd;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.20);
+
+    font-size: 18px;
+    line-height: 1.35;
+    font-weight: 500;
+
+    display: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+
+    z-index: 9999;
+}
+
+.color-tip-box.show {
+    display: block;
+    opacity: 1;
+}
+
+    /* ---------- TOP BAR ---------- */
+    .topbar {
+        width: 100%;
+        background: white;
+        height: 90px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 40px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 50;
+    }
+
+    .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 250px;
+    }
+
+    .topbar-left img { height: 55px; }
+
+    .brand-text {
+        font-weight: 700;
+        font-size: 18px;
+        line-height: 1.2;
+    }
+
+    .brand-tagline {
+        font-size: 14px;
+        opacity: 0.7;
+        font-weight: 500;
+    }
+
+    .topbar-center {
+        flex: 1;
+        text-align: center;
+        font-size: 28px;
+        font-weight: 800;
+    }
+
+    .topbar-right { width: 250px; }
+
+
+    /* ---------- MAIN CONTENT ---------- */
+    .scroll-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 130px 0 140px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .content-card {
+        width: 900px;
+        background: white;
+        padding: 40px 60px 80px;
+        border-radius: 22px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        margin-bottom: 40px;
+min-height: 700px;
+    }
+
+    h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 26px;
+        font-weight: 700;
+    }
+
+    /* GRID 6-COLUMNS */
+    .colors-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 14px;
+        margin-bottom: 40px;
+    }
+
+    .color-tile {
+        height: 90px;
+        border: 2px solid #ccc;
+        border-radius: 12px;
+        cursor: pointer;
+        text-align: center;
+        padding-top: 10px;
+        font-weight: 600;
+        font-size: 14px;
+        background: #ddd;
+        transition: .2s;
+    }
+.tip-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #eee;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    margin-left: 8px;
+    font-size: 14px;
+    font-weight: 700;
+}
+    .color-tile:hover {
+        transform: translateY(-3px);
+        border-color: #111;
+    }
+
+    .color-tile.selected {
+        border-color: #4A5F3A;
+        box-shadow: 0 0 8px rgba(0,0,0,0.18);
+    }
+
+    /* Customer color tile */
+    .customer-color {
+        grid-column: span 6;
+        height: 100px;
+        background: #eee;
+        font-size: 18px;
+        padding-top: 28px;
+    }
+
+    /* ---------- BOTTOM BAR ---------- */
+    .bottombar {
+        width: 100%;
+        height: 110px;
+        background: white;
+        box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 50;
+        padding: 10px 40px 0;
+    }
+
+    .bottom-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 50px;
+    }
+
+    .bottom-btn {
+        padding: 12px 26px;
+        background: #111;
+        color: white;
+        border-radius: 14px;
+        font-size: 20px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .bottom-btn.disabled {
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    #nextBtn {
+        margin-right: 120px;
+    }
+
+    .bottom-price {
+        font-size: 26px;
+        font-weight: 700;
+    }
+.color-disclaimer {
+    font-size: 14px;
+    opacity: 0.6;
+    margin-top: 20px;
+    text-align: center;
+    line-height: 1.4;
+}
+
+    .progressbar {
+        width: 100%;
+        height: 6px;
+        background: #e5e5e5;
+        border-radius: 4px;
+        margin-top: 10px;
+        overflow: hidden;
+    }
+
+    .progressbar-fill {
+        height: 100%;
+        width: 70%;
+        background: #4A5F3A;
+    }
+</style>
+</head>
+
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+    <div class="topbar-left">
+        <img src="img/LOGO.png">
+        <div class="brand-text">
+            Accent Wall Calculator<br>
+            <span class="brand-tagline">Modern Design • Professional Installation</span>
+        </div>
+    </div>
+
+    <div class="topbar-center">SELECT COLOR</div>
+
+    <div class="topbar-right"></div>
+</div>
+
+
+<!-- MAIN CONTENT -->
+<div class="scroll-area">
+<div class="content-card">
+
+    <h2 id="title_primary">
+        Select Main Color
+        <span class="tip-icon" onclick="showTip('primary')">?</span>
+    </h2>
+
+    <div id="grid_primary" class="colors-grid"></div>
+
+    <h2 id="title_secondary" style="display:none;">
+        Select Secondary Color
+        <span class="tip-icon" onclick="showTip('secondary')">?</span>
+    </h2>
+
+    <div id="grid_secondary" class="colors-grid" style="display:none;"></div>
+
+    <!-- ✅ COLOR DISCLAIMER — ВОТ ЗДЕСЬ -->
+    <p class="color-disclaimer">
+        Colors shown on screen may vary from the final result due to lighting,
+        screen settings, and material texture.
+    </p>
+
+</div>
+
+
+
+<!-- BOTTOM BAR -->
+<div class="bottombar">
+    <div class="bottom-row">
+        <div class="bottom-btn" onclick="history.back()">Back</div>
+        <div class="bottom-price" id="priceBox">$0</div>
+        <div class="bottom-btn disabled" id="nextBtn">Continue</div>
+    </div>
+
+    <div class="progressbar">
+        <div class="progressbar-fill"></div>
+    </div>
+</div>
+
+
+<script>
+/* ------- BASIC COLORS -------- */
+const COLORS = [
+  { id: "soft_white", name: "Soft White", hex: "#F4F2EE" },
+  { id: "warm_gray", name: "Warm Gray", hex: "#CFCFCB" },
+  { id: "modern_greige", name: "Modern Greige", hex: "#BEB7AD" },
+  { id: "charcoal", name: "Charcoal Black", hex: "#2F2F2F" },
+  { id: "deep_navy", name: "Deep Navy", hex: "#1F2A44" },
+  { id: "soft_sage", name: "Soft Sage Green", hex: "#8E9A8A" }
+];
+
+/* ------- URL PARAMS -------- */
+const params = new URLSearchParams(window.location.search);
+const design = params.get("design");
+const variant = params.get("variant");
+const prep = params.get("prep");
+const paintMode = params.get("paint_mode");
+const area = parseFloat(params.get("area"));
+const basePrice = parseFloat(params.get("price"));
+const zip = params.get("zip") || "";
+
+
+document.getElementById("priceBox").textContent = "$" + basePrice.toFixed(2);
+
+let primary = null;
+let secondary = null;
+let customerPrimary = false;
+let customerSecondary = false;
+
+/* ------- RENDER COLOR GRID -------- */
+
+function renderGrid(container, isPrimary) {
+    COLORS.forEach((color) => {
+        const tile = document.createElement("div");
+        tile.className = "color-tile";
+        tile.style.background = color.hex;
+        tile.textContent = color.name;
+        tile.style.color =
+            (color.hex === "#2F2F2F" || color.hex === "#1F2A44") ? "#fff" : "#111";
+
+        tile.onclick = () => {
+            if (isPrimary) {
+                primary = color.id;
+                customerPrimary = false;
+                document.querySelectorAll("#grid_primary .color-tile")
+                    .forEach(t => t.classList.remove("selected"));
+            } else {
+                secondary = color.id;
+                customerSecondary = false;
+                document.querySelectorAll("#grid_secondary .color-tile")
+                    .forEach(t => t.classList.remove("selected"));
+            }
+
+            tile.classList.add("selected");
+            enableContinue();
+            updatePriceBox();
+        };
+
+        container.appendChild(tile);
+    });
+
+    const custom = document.createElement("div");
+    custom.className = "color-tile customer-color";
+    custom.textContent = "Customer Provides Custom Color";
+
+    custom.onclick = () => {
+        if (isPrimary) {
+            primary = "CUSTOM";
+            customerPrimary = true;
+            document.querySelectorAll("#grid_primary .color-tile")
+                .forEach(t => t.classList.remove("selected"));
+        } else {
+            secondary = "CUSTOM";
+            customerSecondary = true;
+            document.querySelectorAll("#grid_secondary .color-tile")
+                .forEach(t => t.classList.remove("selected"));
+        }
+
+        custom.classList.add("selected");
+        enableContinue();
+        updatePriceBox();
+    };
+
+    container.appendChild(custom);
+}
+
+renderGrid(document.getElementById("grid_primary"), true);
+
+
+    
+
+/* ------- SHOW SECONDARY IF NEEDED ------- */
+if (paintMode === "multi" || paintMode === "partial") {
+    document.getElementById("title_secondary").style.display = "block";
+    document.getElementById("grid_secondary").style.display = "grid";
+    renderGrid(document.getElementById("grid_secondary"), false);
+}
+
+/* ------- CHECK READY ------- */
+function enableContinue() {
+    if (paintMode === "one" || paintMode === "wood_paint") {
+        if (primary) {
+            document.getElementById("nextBtn").classList.remove("disabled");
+        }
+    } else {
+        if (primary && secondary) {
+            document.getElementById("nextBtn").classList.remove("disabled");
+        }
+    }
+}
+
+/* ------- PRICE CALC -------- */
+function calcFinalPrice() {
+    let extra = 0;
+
+    if (paintMode === "one" || paintMode === "wood_paint") {
+        if (customerPrimary) extra += area * 5;
+    }
+
+    if (paintMode === "multi" || paintMode === "partial") {
+        if (customerPrimary) extra += area * 5;
+        if (customerSecondary) extra += area * 5;
+    }
+
+    return basePrice + extra;
+}
+function updatePriceBox() {
+    const finalPrice = calcFinalPrice();
+    document.getElementById("priceBox").textContent = "$" + finalPrice.toFixed(2);
+}
+
+/* ------- NEXT ------- */
+document.getElementById("nextBtn").onclick = () => {
+    if (document.getElementById("nextBtn").classList.contains("disabled"))
+        return;
+
+    const finalPrice = calcFinalPrice();
+
+window.location.href =
+    `step6.html` +
+    `?design=${design}` +
+    `&variant=${variant}` +
+    `&prep=${prep}` +
+    `&paint_mode=${paintMode}` +
+    `&color_primary=${primary}` +
+    `&color_secondary=${secondary}` +
+    `&area=${area}` +
+    `&price=${finalPrice}` +
+    `&zip=${zip}`;
+
+};
+/* ---------- COLOR TOOLTIP TEXTS ---------- */
+const COLOR_TIPS = {
+    primary: "Primary color – this is the main color used for most of the wall.",
+    secondary: "Secondary color – this is the additional accent color applied to specific sections."
+};
+
+/* ---------- SHOW TIP ---------- */
+function showTip(type) {
+    const box = document.getElementById("colorTipBox");
+    const backdrop = document.getElementById("colorTipBackdrop");
+    const text = document.getElementById("colorTipText");
+
+    text.textContent = COLOR_TIPS[type];
+
+    box.classList.add("show");
+    backdrop.style.display = "block";
+
+    backdrop.onclick = closeColorTip;
+    box.onclick = (e) => e.stopPropagation();
+}
+
+/* ---------- CLOSE TIP ---------- */
+function closeColorTip() {
+    const box = document.getElementById("colorTipBox");
+    const backdrop = document.getElementById("colorTipBackdrop");
+
+    box.classList.remove("show");
+    setTimeout(() => backdrop.style.display = "none", 250);
+}
+
+
+</script>
+<!-- TOOLTIP BACKDROP -->
+<div id="colorTipBackdrop" class="color-tip-backdrop"></div>
+
+<!-- TOOLTIP WINDOW -->
+<div id="colorTipBox" class="color-tip-box">
+    <div id="colorTipText"></div>
+</div>
+
+
+</body>
+</html>
