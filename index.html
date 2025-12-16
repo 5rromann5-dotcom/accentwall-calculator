@@ -352,17 +352,7 @@ min-height: 600px; /* или 650–700 если хочешь больше про
 </div>
 
 <script>
-/* ---------- ZIP SURCHARGE (ГЛОБАЛЬНО) ---------- */
-function getZipSurcharge(zip) {
-    const z = parseInt(zip, 10);
-    if (!z) return 0;
 
-    // Примерные зоны — потом заменишь
-    if (z >= 78600 && z < 78650) return 0;    // локально — без доплаты
-    if (z >= 78700 && z < 78760) return 75;   // Остин
-    if (z >= 78500 && z < 78599) return 150;  // дальняя зона
-    return 200;                               // все остальные ZIP
-}
 
 /* ---------- TOOLTIP ---------- */
 function toggleTip(id) {
@@ -399,14 +389,25 @@ function updateArea() {
         return;
     }
 
-    // Обновляем площадь
-    const area = (h * w).toFixed(1);
-    document.getElementById("areaBox").textContent = `Your wall is: ${area} sq ft`;
+// Обновляем площадь (ЧИСЛО, НЕ строка)
+const area = h * w;
+
+// UI — округляем ТОЛЬКО для отображения
+document.getElementById("areaBox").textContent =
+    `Your wall is: ${area.toFixed(1)} sq ft`;
 
     // Доп. логика высоты
     let heightLevel = 0;
     if (h > 10 && h <= 16) heightLevel = 1;
     if (h > 16) heightLevel = 2;
+// ZIP → ZONE LEVEL (временно простая логика)
+let zoneLevel = 0;
+const z = parseInt(zip, 10);
+
+if (!isNaN(z)) {
+    if (z < 78600 || z > 78799) zoneLevel = 1;
+    if (z < 78000 || z > 78799) zoneLevel = 2;
+}
 
     // Сохраняем значения
     localStorage.setItem("wallHeight", h);
@@ -414,6 +415,7 @@ function updateArea() {
     localStorage.setItem("wallArea", area);
     localStorage.setItem("heightLevel", heightLevel);
     localStorage.setItem("zip", zip);
+localStorage.setItem("zoneLevel", zoneLevel);
 
     // Все валидно → позволяем перейти дальше
     next.classList.remove("disabled");
@@ -424,12 +426,9 @@ document.getElementById("nextBtn").onclick = () => {
     const btn = document.getElementById("nextBtn");
     if (btn.classList.contains("disabled")) return;
 
-    const area = localStorage.getItem("wallArea");
-    const zip = localStorage.getItem("zip") || "";
-    const surcharge = getZipSurcharge(zip);
+   
 
-    window.location.href =
-        `step2.html?area=${area}&zip=${zip}&surcharge=${surcharge}`;
+  window.location.href = "step2.html";
 };
 </script>
 <!-- HOW IT WORKS MODAL -->

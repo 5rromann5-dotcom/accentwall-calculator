@@ -305,8 +305,10 @@ min-height: 700px;
     </div>
 </div>
 
-
+<script src="pricing-config.js"></script>
 <script>
+
+
 /* ------- BASIC COLORS -------- */
 const COLORS = [
   { id: "soft_white", name: "Soft White", hex: "#F4F2EE" },
@@ -319,12 +321,43 @@ const COLORS = [
 
 /* ------- URL PARAMS -------- */
 const params = new URLSearchParams(window.location.search);
-const design = params.get("design");
-const variant = params.get("variant");
-const prep = params.get("prep");
-const paintMode = params.get("paint_mode");
-const area = parseFloat(params.get("area"));
-const basePrice = parseFloat(params.get("price"));
+const design =
+  params.get("design") ||
+  localStorage.getItem("selectedDesign") || "";
+
+const variant =
+  params.get("variant") ||
+  localStorage.getItem("selectedVariant") || "";
+
+const prep =
+  params.get("prep") ||
+  localStorage.getItem("selectedPrep") || "";
+
+const paintModeRaw =
+  params.get("paint_mode") ||
+  localStorage.getItem("selectedFinish") ||   // <-- STEP 4 сохраняет это
+  "";
+
+const area = parseFloat(params.get("area")) || parseFloat(localStorage.getItem("wallArea")) || 0;
+
+let basePrice = parseFloat(params.get("price"));
+if (!Number.isFinite(basePrice)) {
+  basePrice = parseFloat(localStorage.getItem("currentPrice"));
+}
+if (!Number.isFinite(basePrice)) basePrice = 0;
+
+// нормализуем режимы (STEP4 шлёт one/multi/partial/wood_paint/wood)
+const paintMode = (function normalizePaintMode(v) {
+  const x = (v || "").toLowerCase();
+  if (x === "one" || x === "one_color") return "one";
+  if (x === "multi" || x === "multi_color") return "multi";
+  if (x === "partial" || x === "partial_color") return "partial";
+  if (x === "wood_paint" || x === "solid_wood_paint") return "wood_paint";
+  if (x === "wood" || x === "solid_wood_no_paint") return "wood";
+  return x;
+})(paintModeRaw);
+
+
 const zip = params.get("zip") || "";
 
 
@@ -406,32 +439,35 @@ if (paintMode === "multi" || paintMode === "partial") {
 
 /* ------- CHECK READY ------- */
 function enableContinue() {
-    if (paintMode === "one" || paintMode === "wood_paint") {
-        if (primary) {
-            document.getElementById("nextBtn").classList.remove("disabled");
-        }
-    } else {
-        if (primary && secondary) {
-            document.getElementById("nextBtn").classList.remove("disabled");
-        }
-    }
+  const btn = document.getElementById("nextBtn");
+
+  // “one” и “wood_paint/wood” требуют только primary
+  if (paintMode === "one" || paintMode === "wood_paint" || paintMode === "wood") {
+    if (primary) btn.classList.remove("disabled");
+    return;
+  }
+
+  // “multi” и “partial” требуют primary + secondary
+  if (paintMode === "multi" || paintMode === "partial") {
+    if (primary && secondary) btn.classList.remove("disabled");
+  }
 }
+
+
+   
 
 /* ------- PRICE CALC -------- */
 function calcFinalPrice() {
     let extra = 0;
 
-    if (paintMode === "one" || paintMode === "wood_paint") {
-        if (customerPrimary) extra += area * 5;
-    }
-
-    if (paintMode === "multi" || paintMode === "partial") {
-        if (customerPrimary) extra += area * 5;
-        if (customerSecondary) extra += area * 5;
-    }
+    if (customerPrimary) extra += 50;
+    if (customerSecondary) extra += 50;
 
     return basePrice + extra;
 }
+
+
+
 function updatePriceBox() {
     const finalPrice = calcFinalPrice();
     document.getElementById("priceBox").textContent = "$" + finalPrice.toFixed(2);
@@ -487,6 +523,7 @@ function closeColorTip() {
     setTimeout(() => backdrop.style.display = "none", 250);
 }
 
+updatePriceBox();
 
 </script>
 <!-- TOOLTIP BACKDROP -->

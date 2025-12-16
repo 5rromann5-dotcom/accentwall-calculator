@@ -310,69 +310,77 @@
 
 </div>
 
-
+<script src="pricing-config.js"></script>
 <script>
+/* ---------- DATA FROM STEP 1 ---------- */
+const area = parseFloat(localStorage.getItem("wallArea"));
+const heightLevel = parseInt(localStorage.getItem("heightLevel"), 10);
 
-/* ===== ЦЕНЫ — КАК В ОРИГИНАЛЕ (НЕ МЕНЯЛ) ================= */
-const DESIGN_PRICE = {
-    board_batten: 12,
-    modern_geometric: 16,
-    slat_shiplap: 10,
-    herringbone: 20
-};
+// zoneLevel — с защитой
+let zoneLevelRaw = localStorage.getItem("zoneLevel");
+let zoneLevel = parseInt(zoneLevelRaw, 10);
 
-const HEIGHT_COEF = {
-    under10: 1.00,
-    h10_16: 1.25,
-    over16: 1.50
-};
-
-const params = new URLSearchParams(window.location.search);
-const area = parseFloat(params.get("area"));
-const height = parseFloat(params.get("height"));
-const zip = params.get("zip") || "";
-const surcharge = parseFloat(params.get("surcharge") || "0");
-
-
-function getHeightCoef(h) {
-    if (h < 10) return HEIGHT_COEF.under10;
-    if (h <= 16) return HEIGHT_COEF.h10_16;
-    return HEIGHT_COEF.over16;
+if (isNaN(zoneLevel)) {
+    console.warn("zoneLevel missing, defaulting to 0 (local)");
+    zoneLevel = 0;
 }
 
-let selected = null;
+// минимальная валидация
+if (!area || isNaN(heightLevel)) {
+    alert("Calculation data missing. Please restart calculator.");
+}
 
-function selectDesign(e, type) {
-    selected = type;
 
-    document.querySelectorAll(".tile").forEach(t => t.classList.remove("selected"));
+
+
+
+let selectedDesign = null;
+
+function selectDesign(e, designKey) {
+    selectedDesign = designKey;
+
+    // UI
+    document.querySelectorAll(".tile").forEach(t =>
+        t.classList.remove("selected")
+    );
     e.currentTarget.classList.add("selected");
 
-    const next = document.getElementById("nextBtn");
-    next.classList.add("active");
-    next.classList.remove("disabled");
+    const nextBtn = document.getElementById("nextBtn");
+    nextBtn.classList.remove("disabled");
 
-    // NEW PRICE WITH SURCHARGE
-    if (type !== "custom") {
-        const price = area * DESIGN_PRICE[type] * getHeightCoef(height) + surcharge;
-        document.getElementById("bottomPrice").textContent = "$" + price.toFixed(0);
-    } else {
-        document.getElementById("bottomPrice").textContent = "$0";
+    // CUSTOM DESIGN — без автоцены
+    if (designKey === "custom") {
+        document.getElementById("bottomPrice").textContent =
+            "Custom pricing";
+        return;
     }
 
-    next.onclick = () => {
-        if (selected === "custom") {
-            window.location.href =
-                `step7.html?area=${area}&height=${height}&zip=${zip}&surcharge=${surcharge}`;
-        } else {
-            const basePrice =
-                area * DESIGN_PRICE[selected] * getHeightCoef(height) + surcharge;
+    /* ---------- PRICING FROM CONFIG ---------- */
+    const baseRate = DESIGN_BASE_RATE[designKey];
+    const minPrice = DESIGN_MIN_PRICE[designKey];
+    const heightCoef = HEIGHT_COEF[heightLevel];
 
-            window.location.href =
-                `step2_variant.html?design=${selected}&area=${area}&height=${height}&zip=${zip}&surcharge=${surcharge}&base=${basePrice}`;
-        }
+    const base = Math.max(area * baseRate, minPrice);
+    const heightAdjusted = base * heightCoef;
+
+    const zipSurcharge = calculateZipSurcharge(area, zoneLevel);
+
+    const finalPrice = heightAdjusted + zipSurcharge;
+
+    // SHOW PRICE
+    document.getElementById("bottomPrice").textContent =
+        "$" + finalPrice.toFixed(0);
+
+    // SAVE FOR NEXT STEPS
+    localStorage.setItem("selectedDesign", designKey);
+    localStorage.setItem("currentPrice", finalPrice.toFixed(2));
+
+    /* ---------- NAVIGATION ---------- */
+    nextBtn.onclick = () => {
+        window.location.href = "step2_variant.html";
     };
 }
+
 
 
 </script>

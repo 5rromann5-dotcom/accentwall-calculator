@@ -1,481 +1,314 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="icon" href="data:,">
 <meta charset="UTF-8">
 
 <style>
-    body {
-        margin: 0;
-        font-family: "Inter", sans-serif;
-        background: #f7f7f7;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
+body {
+    margin: 0;
+    font-family: "Inter", sans-serif;
+    background: #f7f7f7;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
 
-    /* ---------- TOP BAR ---------- */
-    .topbar {
-        width: 100%;
-        background: white;
-        height: 90px;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0 40px;
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 50;
-    }
+/* ---------- TOP BAR ---------- */
+.topbar {
+    width: 100%;
+    background: white;
+    height: 90px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    position: fixed;
+    top: 0;
+    z-index: 50;
+}
 
-    .topbar-left {
-        display: flex;
-        align-items: center;
-        gap: 14px;
-        width: 250px;
-    }
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+.topbar-left img { height: 55px; }
 
-    .topbar-left img { height: 55px; }
+.topbar-center {
+    flex: 1;
+    text-align: center;
+    font-size: 28px;
+    font-weight: 800;
+}
 
-    .brand-text {
-        font-weight: 700;
-        font-size: 18px;
-        line-height: 1.2;
-    }
+/* ---------- CONTENT ---------- */
+.scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 130px 0 140px;
+    display: flex;
+    justify-content: center;
+}
 
-    .brand-tagline {
-        font-size: 14px;
-        opacity: 0.7;
-        font-weight: 500;
-    }
+.content-card {
+    width: 900px;
+    background: white;
+    padding: 40px 60px 80px;
+    border-radius: 22px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    min-height: 700px;
+}
 
-    .topbar-center {
-        flex: 1;
-        text-align: center;
-        font-size: 28px;
-        font-weight: 800;
-    }
-
-    .topbar-right { width: 250px; }
-
-
-    /* ---------- MAIN CONTENT ---------- */
-    .scroll-area {
-        flex: 1;
-        overflow-y: auto;
-        padding: 130px 0 140px;
-        display: flex;
-        justify-content: center;
-    }
-
-    .content-card {
-        width: 900px;
-        background: white;
-        padding: 40px 60px 80px;
-        border-radius: 22px;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-        margin-bottom: 40px;
-        min-height: 900px;
-    }
-
-    /* ----- GRID (2 in row) ------ */
-    .grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 32px;
-        margin-top: 20px;
-    }
-
-    .tile {
-        border: 2px solid #ddd;
-        border-radius: 16px;
-        padding: 22px;
-        cursor: pointer;
-        transition: 0.2s;
-        background: #fafafa;
-        text-align: center;
-        position: relative;
-    }
-
-    .tile:hover {
-        border-color: #222;
-        transform: translateY(-3px);
-    }
-
-    .tile.selected {
-        border-color: #4A5F3A;
-        box-shadow: 0 0 10px rgba(0,0,0,0.15);
-    }
-
-    .tile-title {
-        font-size: 22px;
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
-
-    .tip-icon {
-        font-size: 20px;
-        width: 26px;
-        height: 26px;
-        border-radius: 50%;
-        background: #eee;
-        border: 1px solid #ccc;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        margin-top: 8px;
-    }
 .step-title {
     font-size: 26px;
     font-weight: 700;
     text-align: center;
     margin-bottom: 30px;
 }
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+}
+
+.tile {
+    border: 2px solid #ddd;
+    border-radius: 16px;
+    padding: 22px;
+    background: #fafafa;
+    cursor: pointer;
+    text-align: center;
+    position: relative;
+    transition: 0.2s;
+}
+
+.tile:hover { border-color: #222; transform: translateY(-3px); }
+.tile.selected { border-color: #4A5F3A; }
 .tile.disabled {
     opacity: 0.35;
     pointer-events: none;
     filter: grayscale(100%);
 }
 
-    /* ---------- BOTTOM BAR ---------- */
-    .bottombar {
-        width: 100%;
-        height: 110px;
-        background: white;
-        box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        z-index: 50;
-        padding: 10px 40px 0;
-    }
+.tile-title {
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
 
-    .bottom-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        height: 50px;
-    }
+.tip-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #eee;
+    border: 1px solid #ccc;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
 
-    .bottom-btn {
-        padding: 12px 26px;
-        background: #111;
-        color: white;
-        border-radius: 14px;
-        font-size: 20px;
-        font-weight: 600;
-        cursor: pointer;
-    }
+/* ---------- BOTTOM ---------- */
+.bottombar {
+    width: 100%;
+    height: 110px;
+    background: white;
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
+    position: fixed;
+    bottom: 0;
+    padding: 10px 40px 0;
+}
 
-    .bottom-btn.disabled {
-        opacity: 0.3;
-        pointer-events: none;
-    }
+.bottom-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.bottom-row > .bottom-price {
+    min-width: 140px;
+    text-align: center;
+}
 
-    #nextBtn {
-        margin-right: 120px;
-    }
+.bottom-btn {
+    padding: 12px 26px;
+    background: #111;
+    color: white;
+    border-radius: 14px;
+    font-size: 20px;
+    cursor: pointer;
+}
+#nextBtn {
+    margin-right: 120px;
+}
+.bottom-btn.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
 
-    .bottom-price {
-        font-size: 26px;
-        font-weight: 700;
-    }
+.bottom-price {
+    font-size: 26px;
+    font-weight: 700;
+}
 
-    .progressbar {
-        width: 100%;
-        height: 6px;
-        background: #e5e5e5;
-        border-radius: 4px;
-        margin-top: 10px;
-        overflow: hidden;
-    }
+/* ---------- TOOLTIP ---------- */
+.tooltip-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: none;
+    z-index: 9998;
+}
 
-    .progressbar-fill {
-        height: 100%;
-        width: 60%;          /* шаг 4 ≈ 60% прогресса */
-        background: #4A5F3A;
-    }
+.tooltip-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 420px;
+    background: white;
+    padding: 18px;
+    border-radius: 16px;
+    display: none;
+    z-index: 9999;
+}
 
-    /* ---- FULLSCREEN IMAGE TOOLTIP ---- */
-    .tooltip-backdrop {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.35);
-        display: none;
-        z-index: 9998;
-    }
-
-    .tooltip-box {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 420px;
-        max-width: 90vw;
-
-        background: white;
-        padding: 18px;
-        border-radius: 16px;
-        border: 1px solid #ddd;
-        box-shadow: 0 10px 35px rgba(0,0,0,0.25);
-
-        display: none;
-        opacity: 0;
-        transition: opacity 0.25s ease;
-
-        z-index: 9999;
-    }
-
-    .tooltip-box.show {
-        display: block;
-        opacity: 1;
-    }
-
-    .tooltip-box img {
-        width: 100%;
-        border-radius: 12px;
-        display: block;
-    }
+.tooltip-box.show { display: block; }
+.tooltip-box img { width: 100%; border-radius: 12px; }
 </style>
 </head>
 
 <body>
 
-<!-- TOPBAR -->
 <div class="topbar">
     <div class="topbar-left">
         <img src="img/LOGO.png">
-        <div class="brand-text">
-            Accent Wall Calculator<br>
-            <span class="brand-tagline">Modern Design • Professional Installation</span>
-        </div>
     </div>
-
     <div class="topbar-center">FINISH OPTIONS</div>
-
-    <div class="topbar-right"></div>
 </div>
 
-
-<!-- MAIN CONTENT -->
 <div class="scroll-area">
 <div class="content-card">
 
+<h2 class="step-title">How would you like your accent wall finished?</h2>
 
-    <h2 class="step-title">
-        How would you like your accent wall finished?
-    </h2>
+<div class="grid">
 
+<div class="tile" onclick="selectFinish('one_color', this)">
+    <div class="tile-title">Paint — One Color</div>
+    <div class="tip-icon" onclick="event.stopPropagation(); showTip('one_color')">?</div>
+</div>
 
+<div class="tile" onclick="selectFinish('multi_color', this)">
+    <div class="tile-title">Paint — Multiple Colors</div>
+    <div class="tip-icon" onclick="event.stopPropagation(); showTip('multi_color')">?</div>
+</div>
 
-    <div class="grid">
-        <div class="tile" onclick="selectFinish('onecolor', event)">
-            <div class="tile-title">Paint — One Color</div>
-            <div class="tip-icon" onclick="showTip(event, 'onecolor')">?</div>
-        </div>
+<div class="tile" onclick="selectFinish('partial_color', this)">
+    <div class="tile-title">Paint — Partial Colors</div>
+    <div class="tip-icon" onclick="event.stopPropagation(); showTip('partial_color')">?</div>
+</div>
 
-        <div class="tile" onclick="selectFinish('multicolor', event)">
-            <div class="tile-title">Paint — Multiple Colors</div>
-            <div class="tip-icon" onclick="showTip(event, 'multicolor')">?</div>
-        </div>
+<div class="tile" onclick="selectFinish('solid_wood_paint', this)">
+    <div class="tile-title">Solid Wood + Paint</div>
+    <div class="tip-icon" onclick="event.stopPropagation(); showTip('solid_wood_paint')">?</div>
+</div>
 
-        <div class="tile" onclick="selectFinish('partial', event)">
-            <div class="tile-title">Paint — Partial Colors</div>
-            <div class="tip-icon" onclick="showTip(event, 'partial')">?</div>
-        </div>
-
-        <div class="tile" onclick="selectFinish('solid_paint', event)">
-            <div class="tile-title">Solid Wood + Paint</div>
-            <div class="tip-icon" onclick="showTip(event, 'solid_paint')">?</div>
-        </div>
-
-        <div class="tile" data-finish="solid_no" onclick="selectFinish('solid_no', event)">
-
-            <div class="tile-title">Solid Wood (No Paint)</div>
-            <div class="tip-icon" onclick="showTip(event, 'solid_no')">?</div>
-        </div>
-    </div>
+<div class="tile" id="tileSolidNoPaint" onclick="selectFinish('solid_wood_no_paint', this)">
+    <div class="tile-title">Solid Wood (No Paint)</div>
+    <div class="tip-icon" onclick="event.stopPropagation(); showTip('solid_wood_no_paint')">?</div>
+</div>
 
 </div>
 </div>
+</div>
 
-
-<!-- BOTTOM BAR -->
 <div class="bottombar">
-    <div class="bottom-row">
-        <div class="bottom-btn" onclick="goBack()">Back</div>
-        <div class="bottom-price" id="priceBox">$0.00</div>
-        <div class="bottom-btn disabled" id="nextBtn">Continue</div>
-    </div>
-
-    <div class="progressbar">
-        <div class="progressbar-fill"></div>
-    </div>
+<div class="bottom-row">
+    <div class="bottom-btn" onclick="goBack()">Back</div>
+    <div class="bottom-price" id="priceBox">$0</div>
+    <div class="bottom-btn disabled" id="nextBtn">Continue</div>
+</div>
 </div>
 
-<!-- MODAL TOOLTIP -->
 <div id="tooltipBackdrop" class="tooltip-backdrop"></div>
-
 <div id="tooltipBox" class="tooltip-box">
-    <img id="tooltipImage" src="">
+    <img id="tooltipImage">
 </div>
 
+
+<script src="pricing-config.js"></script>
 <script>
-/* ===== FINISH RATES ===== */
-const FINISH_RATE = {
-    onecolor:    0.00,
-    multicolor:  0.50,
-    partial:     0.30,
-    solid_paint: 2.00,
-    solid_no:    1.50
+const area = parseFloat(localStorage.getItem("wallArea"));
+let currentPrice = parseFloat(localStorage.getItem("currentPrice"));
+const priceBox = document.getElementById("priceBox");
+priceBox.textContent = "$" + currentPrice.toFixed(0);
+
+let selectedFinish = null;
+
+const FINISH_RESTRICTIONS = {
+    solid_wood_no_paint: ["board_batten", "modern_geometric"]
 };
 
-/* ===== URL PARAMS ===== */
-const params = new URLSearchParams(window.location.search);
-const area   = parseFloat(params.get("area"));
-const design = params.get("design");
-const variant = params.get("variant");
-const prep   = params.get("prep");
-const previousPrice = parseFloat(params.get("price"));
-const zip = params.get("zip");  
-
-/* ===== DISABLE FINISH OPTIONS BASED ON DESIGN ===== */
-function applyFinishRestrictions() {
-
-    // дизайны, где нельзя Solid Wood (No Paint)
-    const restrictedDesigns = ["board_batten", "modern_geometric"];
-
-    if (!design) return;
-
-    if (restrictedDesigns.includes(design)) {
-        const solidNoTile = document.querySelector(
-            '.tile[data-finish="solid_no"]'
-        );
-
-        if (solidNoTile) {
-            solidNoTile.classList.add("disabled");
-        }
-    }
+const selectedDesign = localStorage.getItem("selectedDesign");
+if (FINISH_RESTRICTIONS.solid_wood_no_paint.includes(selectedDesign)) {
+    document.getElementById("tileSolidNoPaint").classList.add("disabled");
 }
 
-// применяем сразу при загрузке
-applyFinishRestrictions();
+const TIP_IMAGES = {
+    one_color: "img/finish_onecolor.jpg",
+    multi_color: "img/finish_multicolor.jpg",
+    partial_color: "img/finish_partial.jpg",
+    solid_wood_paint: "img/finish_solid_paint.jpg",
+    solid_wood_no_paint: "img/finish_solid_no.jpg"
+};
 
-// показать цену из шага 3
-document.getElementById("priceBox").textContent = "$" + previousPrice.toFixed(2);
+const TIP_TEXTS = {
+    one_color: "Single solid paint color applied evenly across the entire accent wall.",
+    multi_color: "Two or more paint colors used to highlight different elements of the design.",
+    partial_color: "Selective painting of specific sections while keeping other areas neutral.",
+    solid_wood_paint: "Solid wood elements installed and fully painted for a seamless look.",
+    solid_wood_no_paint: "Natural solid wood finish with visible grain, no paint applied."
+};
 
-let selected = null;
-
-/* ===== PRICE UPDATE ===== */
-function updatePrice() {
-    if (!selected) return;
-    const added = area * FINISH_RATE[selected];
-    const newPrice = previousPrice + added;
-    document.getElementById("priceBox").textContent = "$" + newPrice.toFixed(2);
-}
-
-/* ===== SELECT FINISH ===== */
-function selectFinish(type, e) {
-    selected = type;
-
-    document.querySelectorAll(".tile").forEach(btn =>
-        btn.classList.remove("selected")
-    );
-
-    e.currentTarget.classList.add("selected");
-    document.getElementById("nextBtn").classList.remove("disabled");
-    updatePrice();
-}
-
-/* ===== TOOLTIP (image) ===== */
-function showTip(event, type) {
-    event.stopPropagation(); // не триггерим selectFinish
-
-    const box = document.getElementById("tooltipBox");
+function showTip(key) {
     const img = document.getElementById("tooltipImage");
-    const backdrop = document.getElementById("tooltipBackdrop");
 
-    // имена файлов: finish_onecolor.jpg, finish_multicolor.jpg и т.д.
-   img.src = "img/finish_" + type + ".jpg";
+    img.src = TIP_IMAGES[key];
+    img.style.display = "block";
 
-
-    box.classList.add("show");
-    backdrop.style.display = "block";
-
-    backdrop.onclick = closeTip;
-    box.onclick = (e) => e.stopPropagation();
+    document.getElementById("tooltipBackdrop").style.display = "block";
+    document.getElementById("tooltipBox").classList.add("show");
 }
 
-function closeTip() {
-    const box = document.getElementById("tooltipBox");
-    const backdrop = document.getElementById("tooltipBackdrop");
 
-    box.classList.remove("show");
-    setTimeout(() => { backdrop.style.display = "none"; }, 250);
-}
 
-/* ===== NAVIGATION ===== */
-/* ===== NAVIGATION ===== */
-document.getElementById("nextBtn").onclick = () => {
-    if (!selected) return;
 
-    const finalPrice = parseFloat(
-        document.getElementById("priceBox").textContent.replace("$", "")
-    );
 
-    let paintMode = "";
-    switch (selected) {
-        case "onecolor": paintMode = "one"; break;
-        case "multicolor": paintMode = "multi"; break;
-        case "partial": paintMode = "partial"; break;
-        case "solid_paint": paintMode = "wood_paint"; break;
-        case "solid_no": paintMode = "wood"; break;
-    }
-
-    // ПРАВИЛЬНО: не переопределяем zip
-    const zipParam = params.get("zip") || "";
-    const surcharge = params.get("surcharge") || 0;
-
-    // --- Solid Wood (No Paint) → сразу step6 ---
-    if (paintMode === "wood") {
-        window.location.href =
-            `step6.html?design=${design}` +
-            `&variant=${variant}` +
-            `&prep=${prep}` +
-            `&paint_mode=${paintMode}` +
-            `&area=${area}` +
-            `&price=${finalPrice}` +
-            `&zip=${zipParam}` +
-            `&surcharge=${surcharge}`;
-        return;
-    }
-
-    // --- Остальные режимы → step4_1 ---
-    window.location.href =
-        `step4_1.html?design=${design}` +
-        `&variant=${variant}` +
-        `&prep=${prep}` +
-        `&paint_mode=${paintMode}` +
-        `&area=${area}` +
-        `&price=${finalPrice}` +
-        `&zip=${zipParam}` +
-        `&surcharge=${surcharge}`;
+document.getElementById("tooltipBackdrop").onclick = () => {
+    document.getElementById("tooltipBackdrop").style.display = "none";
+    document.getElementById("tooltipBox").classList.remove("show");
 };
 
+function selectFinish(key, tile) {
+    if (tile.classList.contains("disabled")) return;
 
-function goBack() {
-  // Закрываем tooltip, если вдруг открыт
-  closeTip();
+    selectedFinish = key;
+    document.querySelectorAll(".tile").forEach(t => t.classList.remove("selected"));
+    tile.classList.add("selected");
 
-  // Возвращаемся на шаг 3, сохраняя все параметры
-  const qs = window.location.search || "";
-  window.location.href = "step3.html" + qs;
+    const rate = FINISH_RATE[key] || 0;
+    const newPrice = addAreaCost(currentPrice, area, rate);
+    priceBox.textContent = "$" + newPrice.toFixed(0);
+
+    localStorage.setItem("currentPrice", newPrice.toFixed(2));
+    localStorage.setItem("selectedFinish", key);
+    document.getElementById("nextBtn").classList.remove("disabled");
+document.getElementById("nextBtn").onclick = goNext;
+
 }
 
-
+function goBack() { window.location.href = "step3.html"; }
+function goNext() { if (selectedFinish) window.location.href = "step4_1.html"; }
 </script>
 
 </body>

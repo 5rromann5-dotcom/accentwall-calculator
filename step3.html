@@ -304,107 +304,80 @@ position: relative;
 <script>
 // ... (ваш JavaScript) ...
 </script>
+
+<script src="pricing-config.js"></script>
+
 <script>
-/* -------------------- COEFFICIENTS -------------------- */
-const PREP_COEF = {
-    smooth: 1.25,
-    texture: 1.0
-};
+/* ---------- DATA FROM PREVIOUS STEPS ---------- */
+const area = parseFloat(localStorage.getItem("wallArea"));
+let currentPrice = parseFloat(localStorage.getItem("currentPrice"));
 
+if (isNaN(area) || isNaN(currentPrice)) {
+    alert("Calculation data missing. Please restart calculator.");
+}
 
-/* -------------------- URL PARAMS -------------------- */
-const params = new URLSearchParams(window.location.search);
-const area = parseFloat(params.get("area"));
-const design = params.get("design");
-const variant = params.get("variant");
-const previousPrice = parseFloat(params.get("price"));
-const zip = params.get("zip") || "";
-const surcharge = parseFloat(params.get("surcharge") || "0");
+/* ---------- INIT PRICE ---------- */
+document.getElementById("bottomPrice").textContent =
+    "$" + currentPrice.toFixed(0);
 
-let selected = null;
+let selectedPrep = null;
 
-
-/* Init price */
-document.getElementById("bottomPrice").textContent = "$" + previousPrice.toFixed(0);
-
-
-/* -------------------- SELECT PREPARATION -------------------- */
+/* ---------- SELECT PREPARATION ---------- */
 function selectPrep(type, tile) {
-    selected = type;
+    selectedPrep = type;
 
-    document.querySelectorAll(".tile").forEach(t => t.classList.remove("selected"));
+    document.querySelectorAll(".tile").forEach(t =>
+        t.classList.remove("selected")
+    );
     tile.classList.add("selected");
 
-    const newPrice = previousPrice * PREP_COEF[type];
-    document.getElementById("bottomPrice").textContent = "$" + newPrice.toFixed(0);
+    let newPrice = currentPrice;
+
+    if (type === "smooth") {
+        newPrice = addAreaCost(
+            currentPrice,
+            area,
+            WALL_PREPARATION_RATE.smooth_wall
+        );
+    }
+
+    document.getElementById("bottomPrice").textContent =
+        "$" + newPrice.toFixed(0);
 
     document.getElementById("nextBtn").classList.remove("disabled");
+
+    // SAVE
+    localStorage.setItem("selectedPrep", type);
+    localStorage.setItem("currentPrice", newPrice.toFixed(2));
 }
 
-
-/* -------------------- TOOLTIP -------------------- */
-/* -------------------- TOOLTIP -------------------- */
-function tip(e, id) {
-    e.stopPropagation(); // не активирует selectPrep
-
-    const el = document.getElementById("tip_" + id);
-    const isOpen = el.classList.contains("show");
-
-    // 1. Закрыть все остальные подсказки, кроме текущей, без таймаута для display: none
-    document.querySelectorAll(".tooltip-bubble").forEach(t => {
-        if (t !== el) { // Важно: закрываем только другие подсказки
-            t.classList.remove("show");
-            // Здесь не ставим setTimeout, чтобы не было гонки условий.
-            // Вместо этого ставим display: none сразу, так как opacity: 0 уже скрыло ее.
-            t.style.display = "none";
-        }
-    });
-
-    // если эта была открыта — просто закрываем (с анимацией)
-    if (isOpen) {
-        el.classList.remove("show");
-        // Ждем завершения анимации (250ms из CSS + запас)
-        setTimeout(() => el.style.display = "none", 280); 
-        return;
-    }
-
-    // иначе показать её (сначала display: block, затем opacity)
-    el.style.display = "block";
-    setTimeout(() => el.classList.add("show"), 10);
-}
-
-// Закрытие подсказки при клике вне ее или значка '?'
-document.body.addEventListener("click", (e) => {
-    // Если клик был по иконке '?' или внутри самой подсказки, ничего не делаем.
-    if (e.target.closest(".tip-icon") || e.target.closest(".tooltip-bubble")) {
-        return;
-    }
-
-    // Иначе закрываем все подсказки
-    document.querySelectorAll(".tooltip-bubble").forEach(t => {
-        if (t.classList.contains("show")) {
-            t.classList.remove("show");
-            // Устанавливаем display: none только после завершения анимации
-            setTimeout(() => (t.style.display = "none"), 200); 
-        }
-    });
-});
-
-
-
-/* -------------------- CONTINUE -------------------- */
+/* ---------- CONTINUE ---------- */
 function goNext() {
-    if (!selected) return;
+    if (!selectedPrep) return;
+    window.location.href = "step4.html";
+}
+/* ---------- TOOLTIP (STEP 3) ---------- */
+function tip(event, type) {
+    event.stopPropagation();
 
-    const finalPrice = parseFloat(
-        document.getElementById("bottomPrice").textContent.replace("$", "")
+    // закрыть все подсказки
+    document.querySelectorAll(".tooltip-bubble").forEach(t =>
+        t.classList.remove("show")
     );
 
-    window.location.href =
-    `step4.html?design=${design}&variant=${variant}&prep=${selected}&area=${area}&price=${finalPrice}&zip=${zip}&surcharge=${surcharge}`;
-
+    const el = document.getElementById("tip_" + type);
+    if (el) el.classList.add("show");
 }
+
+// закрытие по клику вне
+document.addEventListener("click", () => {
+    document.querySelectorAll(".tooltip-bubble").forEach(t =>
+        t.classList.remove("show")
+    );
+});
+
 </script>
+
 
 </body>
 </html>

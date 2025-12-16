@@ -627,7 +627,14 @@ const urlParams = new URLSearchParams(window.location.search);
 
 const collected = {
     design: urlParams.get("design") || "",
-    variant: urlParams.get("variant") || "",
+variant:
+    localStorage.getItem("selectedVariantName") ||
+    localStorage.getItem("variant") ||
+    "",
+
+
+
+
     prep: urlParams.get("prep") || "",
     finish: urlParams.get("finish") || "",
     paint_mode: urlParams.get("paint_mode") || "",
@@ -636,7 +643,12 @@ const collected = {
     area: parseFloat(urlParams.get("area") || "0") || 0,
     width: localStorage.getItem("wallWidth") || urlParams.get("width") || "",
     height: localStorage.getItem("wallHeight") || urlParams.get("height") || "",
-    zip: urlParams.get("zip") || "",
+    zip:
+    urlParams.get("zip") ||
+    localStorage.getItem("zip") ||
+    localStorage.getItem("zipCode") ||
+    "",
+
     price: parseFloat(urlParams.get("price") || "0") || 0,
 
     email: "",

@@ -299,9 +299,40 @@
 </div>
 
 
+<script src="pricing-config.js"></script>
+<!-- TOOLTIP ELEMENTS — ДОЛЖНЫ БЫТЬ ТУТ --++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++>
+<!-- TOOLTIP ELEMENTS -->
+<div id="tooltipBackdrop" class="tooltip-backdrop"></div>
 
+<div id="tooltipBox" class="tooltip-bubble">
+    <div id="tooltipText"></div>
+</div>
 <script>
+/* ---------- DATA FROM PREVIOUS STEPS ---------- */
+const area = parseFloat(localStorage.getItem("wallArea"));
+const heightLevel = parseInt(localStorage.getItem("heightLevel"), 10);
+let zoneLevel = parseInt(localStorage.getItem("zoneLevel"), 10);
+if (isNaN(zoneLevel)) zoneLevel = 0;
 
+const designKey = localStorage.getItem("selectedDesign");
+/* ---------- INITIAL PRICE FROM STEP 2 ---------- */
+const storedPrice = parseFloat(localStorage.getItem("currentPrice"));
+
+if (!isNaN(storedPrice)) {
+    document.getElementById("bottomPrice").textContent =
+        "$" + storedPrice.toFixed(0);
+}
+
+if (!designKey || !area || isNaN(heightLevel)) {
+    alert("Calculation data missing. Please restart calculator.");
+}
+
+/* ---------- BASE DATA FROM CONFIG ---------- */
+const baseRate = DESIGN_BASE_RATE[designKey];
+const minPrice = DESIGN_MIN_PRICE[designKey];
+const heightCoef = HEIGHT_COEF[heightLevel];
+
+/* ---------- TITLES ---------- */
 const designTitles = {
     board_batten: "Board & Batten",
     modern_geometric: "Modern Geometric",
@@ -310,276 +341,153 @@ const designTitles = {
     custom: "Custom Design"
 };
 
-/* --- ORIGINAL YOUR MAP --- */
+document.getElementById("designTitle").innerHTML = `
+    <div class="design-title">${designTitles[designKey]}</div>
+    <div class="design-subtitle">Choose a variant for your accent wall</div>
+`;
+
+/* ---------- VARIANT DATA ---------- */
 const designMap = {
     board_batten: {
         variants: [
-            {
-                img: "variant_bb1.jpg",
-                title: "Classic Vertical Rhythm",
-                tip: "Clean vertical panels with a balanced, timeless look. A versatile option that works well in most interiors."
-            },
-            {
-                img: "variant_bb2.jpg",
-                title: "Upper Accent Panel",
-                tip: "Traditional board & batten with an emphasized upper section, adding architectural structure and visual height."
-            },
-            {
-                img: "variant_bb3.jpg",
-                title: "Multi-Level Grid",
-                tip: "A more detailed layout with multiple horizontal divisions, creating a bold, custom architectural statement."
-            }
+            { img: "variant_bb1.jpg", title: "Classic Vertical Rhythm", tip: "Clean vertical panels with a balanced, timeless look." },
+            { img: "variant_bb2.jpg", title: "Upper Accent Panel", tip: "Traditional board & batten with an emphasized upper section." },
+            { img: "variant_bb3.jpg", title: "Multi-Level Grid", tip: "Detailed layout with multiple horizontal divisions." }
         ]
     },
-
     modern_geometric: {
         variants: [
-            {
-                img: "variant_mg1.jpg",
-                title: "Diagonal Flow",
-                tip: "Dynamic diagonal panels that create movement and a strong modern character."
-            },
-            {
-                img: "variant_mg2.jpg",
-                title: "Cross Geometry",
-                tip: "Intersecting diagonal lines forming a bold architectural composition."
-            },
-            {
-                img: "variant_mg3.jpg",
-                title: "Vertical Pulse",
-                tip: "Vertical elements with rhythmic depth for a clean modern accent."
-            },
-            {
-                img: "variant_mg4.jpg",
-                title: "Falling Lines",
-                tip: "Asymmetric vertical drops adding motion and visual interest."
-            },
-            {
-                img: "variant_mg5.jpg",
-                title: "Woven Grid",
-                tip: "Interlaced geometric pattern inspired by woven structures."
-            },
-            {
-                img: "variant_mg6.jpg",
-                title: "Diamond Matrix",
-                tip: "Repeating diamond geometry creating a structured, architectural surface."
-            },
-            {
-                img: "variant_mg7.jpg",
-                title: "Classic Panels Remix",
-                tip: "Traditional panel rhythm reimagined with modern geometric detailing."
-            },
-            {
-                img: "variant_mg8.jpg",
-                title: "Chevron Focus",
-                tip: "Bold chevron-centered composition with strong symmetry and depth."
-            }
+            { img: "variant_mg1.jpg", title: "Diagonal Flow", tip: "Dynamic diagonal panels." },
+            { img: "variant_mg2.jpg", title: "Cross Geometry", tip: "Intersecting diagonal lines." },
+            { img: "variant_mg3.jpg", title: "Vertical Pulse", tip: "Vertical rhythmic depth." },
+            { img: "variant_mg4.jpg", title: "Falling Lines", tip: "Asymmetric vertical drops." },
+            { img: "variant_mg5.jpg", title: "Woven Grid", tip: "Interlaced geometric pattern." },
+            { img: "variant_mg6.jpg", title: "Diamond Matrix", tip: "Repeating diamond geometry." },
+            { img: "variant_mg7.jpg", title: "Classic Panels Remix", tip: "Traditional panel rhythm reimagined." },
+            { img: "variant_mg8.jpg", title: "Chevron Focus", tip: "Bold chevron-centered composition." }
         ]
     },
-
-  slat_shiplap: {
-    variants: [
-        {
-            img: "variant_slat1.jpg",
-            title: "Vertical Slat Wall",
-            tip: "Clean vertical slats that visually increase ceiling height and add a modern, rhythmic texture."
-        },
-        {
-            img: "variant_slat2.jpg",
-            title: "Horizontal Shiplap",
-            tip: "Classic horizontal boards that visually widen the space and create a calm, timeless feel."
-        },
-        {
-            img: "variant_slat3.jpg",
-            title: "Angled Slat Accent",
-            tip: "Diagonal slat layout for a bold, contemporary accent with strong visual movement."
-        }
-    ]
-},
-herringbone: {
-    variants: [
-        {
-            img: "variant_hc1.jpg",
-            title: "Herringbone Classic",
-            tip: "Traditional herringbone layout with natural rhythm and timeless elegance."
-        },
-        {
-            img: "variant_hc2.jpg",
-            title: "Chevron Line Pattern",
-            tip: "Clean chevron geometry with sharp angles for a modern, architectural look."
-        },
-        {
-            img: "variant_hc3.jpg",
-            title: "Chevron Statement",
-            tip: "Bold chevron composition designed to become the focal point of the space."
-        }
-    ]
-}
-
+    slat_shiplap: {
+        variants: [
+            { img: "variant_slat1.jpg", title: "Vertical Slat Wall", tip: "Clean vertical slats." },
+            { img: "variant_slat2.jpg", title: "Horizontal Shiplap", tip: "Classic horizontal boards." },
+            { img: "variant_slat3.jpg", title: "Angled Slat Accent", tip: "Diagonal slat layout." }
+        ]
+    },
+    herringbone: {
+        variants: [
+            { img: "variant_hc1.jpg", title: "Herringbone Classic", tip: "Traditional herringbone layout." },
+            { img: "variant_hc2.jpg", title: "Chevron Line Pattern", tip: "Clean chevron geometry." },
+            { img: "variant_hc3.jpg", title: "Chevron Statement", tip: "Bold chevron composition." }
+        ]
+    }
 };
 
-
-
-/* --- LOAD SELECTED DESIGN FROM URL --- */
-const params = new URLSearchParams(window.location.search);
-const design = params.get("design");
-const titleEl = document.getElementById("designTitle");
-const basePrice = parseFloat(params.get("base")) || 0;
-const area = parseFloat(params.get("area")) || 0;
-
-
-if (designTitles[design]) {
-    titleEl.innerHTML = `
-        <div class="design-title">${designTitles[design]}</div>
-        <div class="design-subtitle">
-            Choose a variant for your accent wall
-        </div>
-    `;
-}
-
-
-// === SHOW BASE PRICE IMMEDIATELY ===
-let finalPrice = basePrice;
-
-const priceEl = document.getElementById("bottomPrice");
-priceEl.textContent = "$" + basePrice.toFixed(0);
-priceEl.style.opacity = 1;
-
-const zip = params.get("zip") || "";
-const surcharge = parseFloat(params.get("surcharge") || "0");
-
+/* ---------- RENDER VARIANTS ---------- */
 const grid = document.getElementById("variantGrid");
-const VARIANT_COEF = [
-    1.00, // Diagonal Flow
-    1.05, // Cross Geometry
-    1.10, // Vertical Pulse
-    1.15, // Falling Lines
-    1.20, // Woven Grid
-    1.25, // Diamond Matrix
-    1.30, // Classic Panels Remix
-    1.35  // Chevron Focus
-];
-
 let selectedIndex = null;
-let selectedVariantTitle = "";
 
-/* --- RENDER VARIANTS --- */
-if (!designMap[design]) {
-    console.error("Invalid design key:", design);
-    alert("Design data is missing. Please go back and reselect the design.");
-} else {
-    designMap[design].variants.forEach((v, index) => {
-        const tile = document.createElement("div");
-        tile.className = "tile";
+designMap[designKey].variants.forEach((v, index) => {
+    const tile = document.createElement("div");
+    tile.className = "tile";
 
-        const img = document.createElement("img");
-        img.src = "./img/" + v.img;
+    tile.innerHTML = `
+    <img src="./img/${v.img}">
+    <div class="tile-title">${v.title}</div>
+    <div class="tip-icon"
+         onclick="event.stopPropagation(); showTooltip('${v.tip}')">?</div>
+`;
 
 
 
-        const title = document.createElement("div");
-        title.className = "tile-title";
-        title.textContent = v.title;
 
-        const icon = document.createElement("div");
-        icon.className = "tip-icon";
-        icon.textContent = "?";
-        icon.onclick = () => toggleTip(index);
+    tile.onclick = () => selectTile(index, tile);
+    grid.appendChild(tile);
+});
 
-        tile.appendChild(img);
-        tile.appendChild(title);
-        tile.appendChild(icon);
-
-        tile.onclick = () => selectTile(index, tile);
-
-        grid.appendChild(tile);
-    });
-}
-
-
-/* --- SELECT TILE --- */
-
+/* ---------- SELECT VARIANT ---------- */
 function selectTile(index, tile) {
     selectedIndex = index;
-selectedVariantTitle = designMap[design].variants[index].title;
+
     document.querySelectorAll(".tile").forEach((t, i) => {
         t.classList.toggle("selected", i === index);
     });
 
-    // Расчёт итоговой цены
-   finalPrice = basePrice * VARIANT_COEF[index];
-    document.getElementById("bottomPrice").textContent = "$" + finalPrice.toFixed(0);
-    document.getElementById("bottomPrice").style.opacity = 1;
+    const offset =
+        DESIGN_VARIANT_RATE_OFFSET[designKey]?.[index] || 0;
+
+    const newRate = baseRate + offset;
+    const designPrice =
+        Math.max(area * newRate, minPrice) * heightCoef;
+
+    const zipSurcharge =
+        calculateZipSurcharge(area, zoneLevel);
+
+    const finalPrice = designPrice + zipSurcharge;
+
+    document.getElementById("bottomPrice").textContent =
+        "$" + finalPrice.toFixed(0);
 
     document.getElementById("nextBtn").classList.remove("disabled");
+
+    localStorage.setItem("selectedVariantIndex", index);
+    localStorage.setItem("currentPrice", finalPrice.toFixed(2));
+localStorage.setItem("selectedVariantName", designMap[designKey].variants[index].title);
+const variantTitle = tile.querySelector(".tile-title").textContent.trim();
+
+localStorage.setItem("selectedVariantIndex", index);
+localStorage.setItem("selectedVariantName", variantTitle); // можно оставить
+localStorage.setItem("variant", variantTitle);             // ← ВАЖНО
+
+
+
 }
 
-
-/* --- TOOLTIPS --- */
-function toggleTip(index) {
-    const data = designMap[design].variants[index];
-
-    const box = document.getElementById("tooltipBox");
-    const text = document.getElementById("tooltipText");
-    const backdrop = document.getElementById("tooltipBackdrop");
-
-    text.textContent = data.tip;
-
-    box.classList.add("show");
-    backdrop.style.display = "block";
-
-    // Закрытие по клику на фон
-    backdrop.onclick = closeTip;
-
-    // Клик внутри — не закрывает
-    box.onclick = (e) => e.stopPropagation();
-}
-
-function closeTip() {
-    const box = document.getElementById("tooltipBox");
-    const backdrop = document.getElementById("tooltipBackdrop");
-
-    box.classList.remove("show");
-
-    setTimeout(() => {
-        backdrop.style.display = "none";
-    }, 250);
-}
-
-
-
-/* --- CONTINUE --- */
-const SKIP_STEP_3 = ["slat_shiplap", "herringbone"];
-
+/* ---------- CONTINUE ---------- */
 function goNext() {
     if (selectedIndex === null) return;
 
-    const w = params.get("width");
-    const h = params.get("height");
+    const SKIP_STEP_3 = ["slat_shiplap", "herringbone"];
 
-    const baseUrl = SKIP_STEP_3.includes(design)
+    const nextPage = SKIP_STEP_3.includes(designKey)
         ? "step4.html"
         : "step3.html";
 
-    window.location.href =
-        `${baseUrl}?design=${design}` +
-        `&variant=${encodeURIComponent(selectedVariantTitle)}` +
-        `&price=${finalPrice}` +
-        `&area=${area}` +
-        `&width=${w}` +
-        `&height=${h}` +
-        `&zip=${zip}` +
-        `&surcharge=${surcharge}`;
+    const variantName =
+        localStorage.getItem("selectedVariantName") || "";
+
+    const url =
+        `${nextPage}?variant=${encodeURIComponent(variantName)}`;
+
+    window.location.href = url;
+}
+
+/* ---------- TOOLTIP LOGIC ---------- */
+const tooltipBackdrop = document.getElementById("tooltipBackdrop");
+const tooltipBox = document.getElementById("tooltipBox");
+const tooltipText = document.getElementById("tooltipText");
+
+if (!tooltipBackdrop || !tooltipBox || !tooltipText) {
+    console.error("Tooltip elements missing in DOM");
 }
 
 
+function showTooltip(text) {
+    tooltipText.textContent = text;
+    tooltipBackdrop.style.display = "block";
+    tooltipBox.classList.add("show");
+}
+
+tooltipBackdrop.onclick = () => {
+    tooltipBackdrop.style.display = "none";
+    tooltipBox.classList.remove("show");
+};
 
 </script>
- <!-- TOOLTIP ELEMENTS — ДОЛЖНЫ БЫТЬ ТУТ -->
-    <div id="tooltipBackdrop" class="tooltip-backdrop"></div>
 
-    <div id="tooltipBox" class="tooltip-bubble">
-        <div id="tooltipText"></div>
-    </div>
+ 
+
+
+
 </body>
 </html>
