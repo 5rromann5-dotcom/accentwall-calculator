@@ -19,10 +19,10 @@
    Используются при первом расчёте цены стены
    ===================================================================== */
 const DESIGN_BASE_RATE = {
-    board_batten: 12,
+    board_batten: 14,
     modern_geometric: 16,
     slat_shiplap: 12,
-    herringbone: 20,
+    herringbone: 28,
     custom: null          // custom считается вручную
 };
 
@@ -32,10 +32,10 @@ const DESIGN_BASE_RATE = {
    Защита от слишком маленьких и убыточных проектов
    ===================================================================== */
 const DESIGN_MIN_PRICE = {
-    board_batten: 900,
-    modern_geometric: 1200,
-    slat_shiplap: 900,
-    herringbone: 1500,
+    board_batten: 920,
+    modern_geometric: 1230,
+    slat_shiplap: 910,
+    herringbone: 1562,
     custom: 1500
 };
 
@@ -68,8 +68,8 @@ const ZIP_POLICY = {
    Первый вариант = базовая ставка (offset = 0)
    ===================================================================== */
 const DESIGN_VARIANT_RATE_OFFSET = {
-    board_batten:      [0, 1, 2],
-    modern_geometric: [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5],
+    board_batten:      [0, 1.5, 3.5],
+    modern_geometric: [0, 0.5, 0, 0.5, 3, 3.5, 5, 6],
     slat_shiplap:      [0, 0.5, 1],
     herringbone:       [0, 1, 2]
 };
@@ -91,10 +91,10 @@ const WALL_PREPARATION_RATE = {
    ===================================================================== */
 const FINISH_RATE = {
     one_color: 0,
-    multi_color: 0.5,
-    partial_color: 0.3,
-    solid_wood_paint: 2.0,
-    solid_wood_no_paint: 1.5
+    multi_color: 1,
+    partial_color: 0.5,
+    solid_wood_paint: 2.5,
+    solid_wood_no_paint: 4
 };
 
 

@@ -12,6 +12,50 @@ body {
     display: flex;
     flex-direction: column;
 }
+/* одинаковая база для Email/Phone */
+.continue-btn {
+  background: #777;           /* одинаковый цвет, когда неактивны */
+  color: #fff;
+}
+/* Добавьте эти стили, чтобы всё работало корректно */
+/* Найдите и замените этот блок */
+#commSection, #finalMessage, .another-quote-block {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+
+
+/* Это позволит элементам появляться */
+.show {
+    display: block !important;
+    opacity: 1 !important;
+}
+
+#submitBtn {
+    transition: all 0.3s ease;
+}
+
+#submitBtn.active {
+    background: #111 !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
+    transform: scale(1.02);
+}
+
+.file-item {
+    background: #eef9f3;
+    padding: 8px 12px;
+    border-radius: 8px;
+    margin-bottom: 5px;
+    border-left: 4px solid #27ae60;
+    font-size: 14px;
+}
+/* выбранный метод */
+.active-method {
+  background: #111 !important;
+  color: #fff !important;
+}
 
 /* ---------- TOP BAR ---------- */
 .topbar {
@@ -134,7 +178,9 @@ h1 {
 }
 
 .center { text-align: center; }
-.hidden { display: none; }
+/* Найди это и замени */
+.hidden { display: none !important; }
+
 
 .submit-btn {
     margin: 35px auto 0;
@@ -161,11 +207,19 @@ h1 {
     padding: 14px 24px;
     font-size: 20px;
     font-weight: 700;
-    background: #111;
+    background: #777;          /* НЕАКТИВНО */
     color: white;
     border-radius: 14px;
     cursor: pointer;
 }
+
+/* Добавь это в конец <style> */
+#submitBtn.active {
+    background: #111 !important;
+    opacity: 1 !important;
+    cursor: pointer !important;
+}
+
 </style>
 </head>
 
@@ -190,9 +244,18 @@ h1 {
 <h1>CUSTOM DESIGN REQUEST</h1>
 
 <label for="fileInput" class="upload-btn">UPLOAD FILE</label>
-<input type="file" id="fileInput" accept="image/*,application/pdf" hidden>
+<input
+  type="file"
+  id="fileInput"
+  accept="image/*,application/pdf"
+  multiple
+  hidden
+>
+
 <div class="file-hint">Max file size: 10 MB (JPG, PNG, PDF)</div>
 <div id="fileName" class="file-name"></div>
+<ul id="fileList" style="margin-top:10px;"></ul>
+
 
 <label class="label">Describe your custom design</label>
 <textarea
@@ -206,18 +269,29 @@ h1 {
 <label class="label">Your Email</label>
 <input id="emailInput" class="input-field" type="email">
 
+
+
+<div id="contactBlock" class="center hidden" style="margin-top:40px;">
+
+  <h2>How would you prefer to communicate?</h2>
+
+<div class="continue-btn" id="emailBtn" onclick="toggleMethod('email')">
+  Email
+</div>
+
+
+  <div class="continue-btn"
+     id="phoneBtn"
+     style="margin-left:12px;"
+     onclick="toggleMethod('phone')">
+  Phone
+</div>
+
+</div>
+<div id="phoneBlock" class="hidden center" style="margin-top:25px;">
+  <input id="phoneInput" class="input-field" placeholder="+1 512 555 0000">
+</div>
 <div id="submitBtn" class="submit-btn">SUBMIT</div>
-
-<div id="contactBlock" class="hidden center" style="margin-top:40px;">
-    <h2>How would you prefer to communicate?</h2>
-    <div class="continue-btn" onclick="chooseMethod('email')">Email</div>
-    <div class="continue-btn" style="background:#444;margin-left:12px;" onclick="chooseMethod('phone')">Phone</div>
-</div>
-
-<div id="phoneBlock" class="hidden center">
-    <input id="phoneInput" class="input-field" placeholder="+1 512 555 0000">
-    <div class="continue-btn" onclick="finishWithPhone()">Finish</div>
-</div>
 
 <div id="finalMessage" class="hidden center" style="margin-top:60px;font-size:26px;font-weight:700;">
     Thank you!<br>Our project manager will contact you shortly.
@@ -236,91 +310,249 @@ h1 {
 </div>
 </div>
 
+
 <script>
+
+
+
 const webhook = "https://wallartacwllc.app.n8n.cloud/webhook/accentwall/custom-design";
 
-let collected = {
-  type: "CUSTOM",
-  description: "",
-  email: "",
-  phone: null,
-  file: null
+const collected = JSON.parse(localStorage.getItem("calc_collected") || "{}");
+
+const fileInput = document.getElementById("fileInput");
+const fileList = document.getElementById("fileList");
+
+const emailInput = document.getElementById("emailInput");
+const messageInput = document.getElementById("customMessage");
+const contactBlock = document.getElementById("contactBlock");
+const emailBtn = document.getElementById("emailBtn");
+const phoneBtn = document.getElementById("phoneBtn");
+const phoneBlock = document.getElementById("phoneBlock");
+const submitBtn = document.getElementById("submitBtn");
+const phoneInput = document.getElementById("phoneInput");
+
+
+let uploadedFiles = [];
+let selectedMethod = null;
+
+// === FILE UPLOAD UI ===
+function renderFileList() {
+    fileList.innerHTML = "";
+    uploadedFiles.forEach((file, index) => {
+        const item = document.createElement("li");
+        item.className = "file-item";
+        item.style.display = "flex";
+        item.style.justifyContent = "space-between";
+        item.style.alignItems = "center";
+
+        item.innerHTML = `
+            <span>✓ ${file.name} (${(file.size / 1024).toFixed(1)} KB)</span>
+            <span style="cursor:pointer;color:#e74c3c;font-weight:bold;"
+                  onclick="removeFile(${index})">✕</span>
+        `;
+        fileList.appendChild(item);
+    });
+}
+function checkContactVisibility() {
+    const emailValid =
+        emailInput.value.includes("@") &&
+        emailInput.value.includes(".");
+
+    const messageValid =
+        messageInput.value.trim().length > 5;
+
+    const filesValid =
+        uploadedFiles.length > 0;
+
+    if (emailValid && messageValid && filesValid) {
+        contactBlock.classList.remove("hidden");
+        contactBlock.classList.add("show");
+    } else {
+        contactBlock.classList.add("hidden");
+        contactBlock.classList.remove("show");
+    }
+}
+function isValidPhone(phone) {
+    const digits = phone.replace(/\D/g, "");
+    return digits.length === 10 || digits.length === 11;
+}
+
+function toggleMethod(method) {
+    selectedMethod = method;
+
+    emailBtn.classList.remove("active-method");
+    phoneBtn.classList.remove("active-method");
+
+   if (method === "email") {
+    emailBtn.classList.add("active-method");
+    phoneBlock.classList.add("hidden");
+    phoneBlock.classList.remove("show");
+    collected.preferredContact = "email";
+}
+
+if (method === "phone") {
+    phoneBtn.classList.add("active-method");
+    phoneBlock.classList.remove("hidden");
+    phoneBlock.classList.add("show");
+    phoneInput.focus();
+    collected.preferredContact = "phone";
+    submitBtn.classList.remove("active"); // пока телефон не валиден
+}
+
+
+
+    checkSubmitState();
+}
+function checkSubmitState() {
+    submitBtn.classList.remove("active");
+
+    if (selectedMethod === "email") {
+        submitBtn.classList.add("active");
+        return;
+    }
+
+    if (selectedMethod === "phone") {
+        if (isValidPhone(phoneInput.value)) {
+            submitBtn.classList.add("active");
+        }
+    }
+}
+
+
+
+
+window.removeFile = (index) => {
+    uploadedFiles.splice(index, 1);
+    renderFileList();
+    checkContactVisibility();
+    checkSubmitState();
 };
 
-// FILE UPLOAD
-fileInput.addEventListener("change", e => {
-  const f = e.target.files[0];
-  if (!f) return;
-  if (f.size > 10 * 1024 * 1024) {
-    alert("Max file size 10 MB");
-    return;
+
+fileInput.addEventListener("change", () => {
+    const files = Array.from(fileInput.files);
+
+    files.forEach(file => {
+        if (!uploadedFiles.some(f => f.name === file.name)) {
+            uploadedFiles.push(file);
+        }
+    });
+
+    renderFileList();
+    checkContactVisibility();
+    fileInput.value = "";
+});
+emailInput.addEventListener("input", checkContactVisibility);
+messageInput.addEventListener("input", checkContactVisibility);
+phoneInput.addEventListener("input", checkSubmitState);
+
+  function fileToBase64NoPrefix(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = () => {
+        // reader.result = "data:xxx/yyy;base64,AAAA..."
+        const result = String(reader.result || "");
+        const base64 = result.includes(",") ? result.split(",")[1] : result;
+        resolve(base64);
+      };
+      reader.readAsDataURL(file);
+    });
   }
-  fileName.textContent = "File uploaded: " + f.name;
-  const r = new FileReader();
-  r.onload = () => collected.file = r.result;
-  r.readAsDataURL(f);
+
+
+submitBtn.addEventListener("click", async () => {
+    if (!submitBtn.classList.contains("active")) return;
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+  for (const f of uploadedFiles) {
+    if (f.size > MAX_FILE_SIZE) {
+      alert(`File "${f.name}" is larger than 10 MB.`);
+      submitBtn.textContent = "SUBMIT";
+      checkSubmitState();
+      return;
+    }
+  }
+    submitBtn.classList.remove("active");
+    submitBtn.textContent = "SENDING...";
+
+  
+    // === prepare files (ALL files) ===
+let files = [];
+
+if (uploadedFiles.length > 0) {
+  files = await Promise.all(
+    uploadedFiles.map(async (file) => ({
+      name: file.name,
+      mime: file.type || "application/octet-stream",
+      size: file.size,
+      base64: await fileToBase64NoPrefix(file), // без data:...;base64,
+    }))
+  );
+}
+
+
+    // === build payload for n8n ===
+    const payload = {
+        email: emailInput.value.trim(),
+        phone: selectedMethod === "phone" ? phoneInput.value.trim() : "",
+        method: selectedMethod,
+        description: messageInput.value.trim(),
+        files,
+    };
+
+    try {
+        await fetch(webhook, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        resetForm();
+    } catch (err) {
+        console.error("Submit error:", err);
+        submitBtn.textContent = "SUBMIT";
+        checkSubmitState();
+    }
 });
 
-// VALIDATION
-function validateForm() {
-  const email = emailInput.value.trim();
-  const desc = customMessage.value.trim();
 
-  email.includes("@") && desc.length > 5
-    ? submitBtn.classList.add("active")
-    : submitBtn.classList.remove("active");
+function resetForm() {
+    // inputs
+    emailInput.value = "";
+    phoneInput.value = "";
+    messageInput.value = "";
+
+    // files
+    uploadedFiles = [];
+    fileList.innerHTML = "";
+
+    // states
+    selectedMethod = null;
+
+    emailBtn.classList.remove("active-method");
+    phoneBtn.classList.remove("active-method");
+
+    contactBlock.classList.add("hidden");
+    contactBlock.classList.remove("show");
+
+    phoneBlock.classList.add("hidden");
+    phoneBlock.classList.remove("show");
+
+    submitBtn.textContent = "SUBMIT";
+    submitBtn.classList.remove("active");
+
+    // show final message
+    document.getElementById("finalMessage").classList.remove("hidden");
+    document.getElementById("finalMessage").classList.add("show");
 }
-
-emailInput.oninput = validateForm;
-customMessage.oninput = validateForm;
-
-// SUBMIT
-submitBtn.onclick = () => {
-  if (!submitBtn.classList.contains("active")) return;
-
-  collected.email = emailInput.value.trim();
-  collected.description = customMessage.value.trim();
-
-  contactBlock.classList.remove("hidden");
-};
-
-// CONTACT METHOD
-function chooseMethod(m) {
-  m === "email"
-    ? finishAndSend(null)
-    : phoneBlock.classList.remove("hidden");
-}
-
-function finishWithPhone() {
-  finishAndSend(phoneInput.value.trim());
-}
-
-// FINAL SEND
-function finishAndSend(phone) {
-  collected.phone = phone;
-
-  fetch(webhook, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(collected),
-  });
-
-  submitBtn.style.display = "none";
-  contactBlock.classList.add("hidden");
-  phoneBlock.classList.add("hidden");
-  finalMessage.classList.remove("hidden");
-
-  setTimeout(() => anotherQuote.classList.remove("hidden"), 1000);
-}
-
-function startNewQuote() {
-  location.href = "index.html";
-}
-
 function goBackToDesigns() {
-  location.href = "step2.html";
+    window.location.href = "step2.html";
 }
+
+
 </script>
+
+
 
 
 </body>

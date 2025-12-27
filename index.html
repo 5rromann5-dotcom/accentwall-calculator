@@ -257,16 +257,6 @@ min-height: 600px; /* или 650–700 если хочешь больше про
         width: 15%;
         transition: width 0.3s;
     }
-<button id="howBtn" style="
-    padding: 14px 32px;
-    background:#4A5F3A;
-    color:white;
-    border:none;
-    border-radius:14px;
-    font-size:19px;
-    font-weight:700;
-    cursor:pointer;
-">How it works</button>
 
 
 </style>
@@ -294,14 +284,19 @@ min-height: 600px; /* или 650–700 если хочешь больше про
 
 <div class="scroll-area">
     <div class="content-card">
+<div class="row" style="margin-bottom:20px; text-align:center;">
+    <button class="big-cta" id="howBtn">How it works</button>
+</div>
 
         <div class="image-block">
             <img src="img/1HW.png" alt="Wall Preview">
         </div>
 
         <div class="row">
-            <label>Wall Height (ft)</label>
-            <input id="heightInput" class="input-field" type="number" min="1" oninput="updateArea()">
+            <label>Wall Height</label>
+<input id="heightFtInput" class="input-field" type="number" min="0" placeholder="ft" oninput="updateArea()" style="width:110px;">
+<input id="heightInInput" class="input-field" type="number" min="0" max="11" placeholder="in" oninput="updateArea()" style="width:110px;">
+
 
             <span class="tip-wrapper">
                 <span class="tip-icon" onclick="toggleTip('t1')">?</span>
@@ -310,8 +305,10 @@ min-height: 600px; /* или 650–700 если хочешь больше про
         </div>
 
         <div class="row">
-            <label>Wall Width (ft)</label>
-            <input id="widthInput" class="input-field" type="number" min="1" oninput="updateArea()">
+            <label>Wall Width</label>
+<input id="widthFtInput" class="input-field" type="number" min="0" placeholder="ft" oninput="updateArea()" style="width:110px;">
+<input id="widthInInput" class="input-field" type="number" min="0" max="11" placeholder="in" oninput="updateArea()" style="width:110px;">
+
 
             <span class="tip-wrapper">
                 <span class="tip-icon" onclick="toggleTip('t2')">?</span>
@@ -327,10 +324,7 @@ min-height: 600px; /* или 650–700 если хочешь больше про
         <div class="row">
             <div id="areaBox" class="area-box">Your wall is: 0 sq ft</div>
         </div>
-<div class="row" style="margin-top:25px; text-align:center;">
-    <button class="big-cta" id="howBtn">How it works</button>
 
-</div>
 
     </div>
 </div>
@@ -372,54 +366,54 @@ function updateZip() {
 
 /* ---------- CALCULATE AREA + ENABLE NEXT ---------- */
 function updateArea() {
-    const hInput = document.getElementById("heightInput");
-    const wInput = document.getElementById("widthInput");
+    const hFt = parseFloat(document.getElementById("heightFtInput")?.value) || 0;
+    const hIn = parseFloat(document.getElementById("heightInInput")?.value) || 0;
+    const wFt = parseFloat(document.getElementById("widthFtInput")?.value) || 0;
+    const wIn = parseFloat(document.getElementById("widthInInput")?.value) || 0;
+
     const zipInput = document.getElementById("zipInput");
     const next = document.getElementById("nextBtn");
-
-    if (!hInput || !wInput || !zipInput) return;
-
-    const h = parseFloat(hInput.value);
-    const w = parseFloat(wInput.value);
     const zip = zipInput.value.trim();
 
-    // Валидируем ТРИ поля: высота, ширина, ZIP
-    if (!h || !w || h <= 0 || w <= 0 || zip.length < 5) {
+    // переводим в футы
+    const height = hFt + (hIn / 12);
+    const width  = wFt + (wIn / 12);
+
+    if (height <= 0 || width <= 0 || zip.length < 5) {
         next.classList.add("disabled");
+        document.getElementById("areaBox").textContent = "Your wall is: 0 sq ft";
         return;
     }
 
-// Обновляем площадь (ЧИСЛО, НЕ строка)
-const area = h * w;
+    const area = height * width;
 
-// UI — округляем ТОЛЬКО для отображения
-document.getElementById("areaBox").textContent =
-    `Your wall is: ${area.toFixed(1)} sq ft`;
+    document.getElementById("areaBox").textContent =
+        `Your wall is: ${area.toFixed(1)} sq ft`;
 
-    // Доп. логика высоты
+    // уровни высоты (оставляем твою логику)
     let heightLevel = 0;
-    if (h > 10 && h <= 16) heightLevel = 1;
-    if (h > 16) heightLevel = 2;
-// ZIP → ZONE LEVEL (временно простая логика)
-let zoneLevel = 0;
-const z = parseInt(zip, 10);
+    if (height > 10 && height <= 16) heightLevel = 1;
+    if (height > 16) heightLevel = 2;
 
-if (!isNaN(z)) {
-    if (z < 78600 || z > 78799) zoneLevel = 1;
-    if (z < 78000 || z > 78799) zoneLevel = 2;
-}
+    // ZIP → zone
+    let zoneLevel = 0;
+    const z = parseInt(zip, 10);
+    if (!isNaN(z)) {
+        if (z < 78600 || z > 78799) zoneLevel = 1;
+        if (z < 78000 || z > 78799) zoneLevel = 2;
+    }
 
-    // Сохраняем значения
-    localStorage.setItem("wallHeight", h);
-    localStorage.setItem("wallWidth", w);
+    // сохраняем В ФУТАХ
+    localStorage.setItem("wallHeight", height);
+    localStorage.setItem("wallWidth", width);
     localStorage.setItem("wallArea", area);
     localStorage.setItem("heightLevel", heightLevel);
     localStorage.setItem("zip", zip);
-localStorage.setItem("zoneLevel", zoneLevel);
+    localStorage.setItem("zoneLevel", zoneLevel);
 
-    // Все валидно → позволяем перейти дальше
     next.classList.remove("disabled");
 }
+
 
 /* ---------- NAVIGATION ---------- */
 document.getElementById("nextBtn").onclick = () => {

@@ -82,7 +82,7 @@
         border-radius: 22px;
         box-shadow: 0 8px 25px rgba(0,0,0,0.08);
         margin-bottom: 40px;
-        min-height: 1200px; /* больше высота, чтобы всё влезало */
+        min-height: 1600px; /* больше высота, чтобы всё влезало */
     }
 
     .section-title {
@@ -404,6 +404,11 @@
         <div class="summary-layout">
             <!-- LEFT: SUMMARY LIST -->
             <div class="summary-box">
+<div class="summary-row">
+    <div class="summary-label">Order ID</div>
+    <div class="summary-value" id="sumOrderId">—</div>
+</div>
+
                 <div class="summary-row">
                     <div class="summary-label">Design</div>
                     <div class="summary-value" id="sumDesign">—</div>
@@ -484,7 +489,7 @@
 
         <!-- EMAIL SECTION (hidden initially) -->
         <div class="flow-section" id="emailSection" style="display:none;">
-            <h3>Please enter your email</h3>
+            <h3>1.Please enter your email</h3>
             <p>We’ll send you a detailed quote and next steps.</p>
             <input id="emailInput" type="email" class="text-input" placeholder="your@email.com">
             <div class="helper-text">
@@ -494,8 +499,9 @@
 
         <!-- COMMUNICATION SECTION -->
         <div class="flow-section" id="commSection" style="display:none;">
-            <h3>How would you prefer to communicate?</h3>
+            <h3>2.How would you prefer to communicate?</h3>
             <p>You can choose email, phone, or both — whatever works best for you.</p>
+
 
             <div class="comm-options">
                 <button type="button" id="commEmail" class="comm-btn selected">By Email</button>
@@ -506,11 +512,19 @@
                 <label for="phoneInput">Phone number</label>
                 <input id="phoneInput" type="tel" class="text-input" placeholder="+1 (555) 123-4567">
             </div>
+<h3>3.How can we address you?</h3>
+<p>Please enter your name</p>
+<input id="nameInput" type="text" class="text-input" placeholder="Your name">
+<div class="helper-text">
+    This will be used in your estimate and future communication.
+</div>
 
+<br>
             <div class="cta-centered" style="margin-top:20px;">
-                <button id="confirmCommBtn" class="primary-btn big-cta">
-                    Confirm 
-                </button>
+                <button id="confirmCommBtn" class="primary-btn big-cta" style="display:none;">
+    Confirm 
+</button>
+
             </div>
 
             <div class="status-message" id="crmStatus"></div>
@@ -518,6 +532,10 @@
 
         <!-- SEND INVOICE BUTTON (after CRM OK) -->
         <div class="cta-centered" id="invoiceSection" style="display:none;">
+<div class="status-message status-ok" id="invoiceStatus" style="display:none;">
+    Your estimate has been sent to your email. Please check your inbox.
+</div>
+
             <button id="sendInvoiceBtn" class="secondary-btn big-cta">
                 Send invoice to email
             </button>
@@ -622,45 +640,40 @@ At the end of the process, you will receive an ACCURATE price and an estimated i
 
 
 <script>
-/* ========== URL PARAMS & COLLECTED DATA ========== */
+/* ========== 1. ИНИЦИАЛИЗАЦИЯ ДАННЫХ ========== */
 const urlParams = new URLSearchParams(window.location.search);
 
+// Проверяем и создаем ID заказа, если его нет
+function generateOrderId() {
+    return "ORD-" + Date.now();
+}
+
+const storedOrderId = generateOrderId();
+
 const collected = {
+client_name: "",
+    orderId: storedOrderId, // Теперь ID точно есть здесь
     design: urlParams.get("design") || "",
-variant:
-    localStorage.getItem("selectedVariantName") ||
-    localStorage.getItem("variant") ||
-    "",
-
-
-
-
+    variant: localStorage.getItem("selectedVariantName") || urlParams.get("variant") || "",
     prep: urlParams.get("prep") || "",
     finish: urlParams.get("finish") || "",
     paint_mode: urlParams.get("paint_mode") || "",
     color_primary: urlParams.get("color_primary") || "",
     color_secondary: urlParams.get("color_secondary") || "",
-    area: parseFloat(urlParams.get("area") || "0") || 0,
+    area: parseFloat(urlParams.get("area") || "0"),
     width: localStorage.getItem("wallWidth") || urlParams.get("width") || "",
     height: localStorage.getItem("wallHeight") || urlParams.get("height") || "",
-    zip:
-    urlParams.get("zip") ||
-    localStorage.getItem("zip") ||
-    localStorage.getItem("zipCode") ||
-    "",
-
-    price: parseFloat(urlParams.get("price") || "0") || 0,
-
+    zip: localStorage.getItem("zip") || urlParams.get("zip") || "",
+    price: parseFloat(urlParams.get("price") || "0"),
     email: "",
     phone: "",
     method: "",
-
     installDateISO: "",
     installDateText: "",
     installDuration: 0
 };
 
-/* ========== INIT SUMMARY UI ========== */
+/* ========== 2. ОБНОВЛЕНИЕ ИНТЕРФЕЙСА (SUMMARY) ========== */
 function mapPaintMode(mode) {
     switch (mode) {
         case "one": return "Paint — one color";
@@ -673,6 +686,7 @@ function mapPaintMode(mode) {
 }
 
 function initSummary() {
+    document.getElementById("sumOrderId").textContent = collected.orderId;
     document.getElementById("sumDesign").textContent = collected.design || "—";
     document.getElementById("sumVariant").textContent = collected.variant || "—";
     document.getElementById("sumPrep").textContent = collected.prep || "—";
@@ -687,35 +701,23 @@ function initSummary() {
     } else {
         if (collected.color_primary && collected.color_primary !== "null") {
             document.getElementById("sumColorPrimary").textContent = collected.color_primary;
-        } else {
-            rowPrimary.style.display = "none";
-        }
+        } else { rowPrimary.style.display = "none"; }
 
         if (collected.color_secondary && collected.color_secondary !== "null") {
             document.getElementById("sumColorSecondary").textContent = collected.color_secondary;
-        } else {
-            rowSecondary.style.display = "none";
-        }
+        } else { rowSecondary.style.display = "none"; }
     }
 
-    document.getElementById("sumArea").textContent =
-        collected.area ? collected.area.toFixed(1) + " sq.ft" : "—";
-
+    document.getElementById("sumArea").textContent = collected.area ? collected.area.toFixed(1) + " sq.ft" : "—";
     if (collected.width && collected.height) {
-        document.getElementById("sumSize").textContent =
-            collected.width + " ft × " + collected.height + " ft";
-    } else {
-        document.getElementById("sumSize").textContent = "—";
-    }
+        document.getElementById("sumSize").textContent = collected.width + " ft × " + collected.height + " ft";
+    } else { document.getElementById("sumSize").textContent = "—"; }
 
     document.getElementById("sumZip").textContent = collected.zip || "—";
-
-    document.getElementById("priceBox").textContent =
-        "$" + collected.price.toFixed(2);
+    document.getElementById("priceBox").textContent = "$" + collected.price.toFixed(2);
 }
 
-/* ========== HOW IT WORKS MODAL ========== */
-/* ========== HOW IT WORKS MODAL ========== */
+/* ========== 3. ЛОГИКА МОДАЛЬНОГО ОКНА ========== */
 const howBtn = document.getElementById("howBtn");
 const howBackdrop = document.getElementById("howBackdrop");
 const howBox = document.getElementById("howBox");
@@ -726,7 +728,6 @@ function openHow() {
     howBox.style.display = "block";
     setTimeout(() => howBox.style.opacity = "1", 10);
 }
-
 function closeHow() {
     howBox.style.opacity = "0";
     setTimeout(() => {
@@ -734,22 +735,20 @@ function closeHow() {
         howBackdrop.style.display = "none";
     }, 220);
 }
+howBtn.onclick = openHow;
+howCloseBtn.onclick = closeHow;
+howBackdrop.onclick = closeHow;
 
-howBtn.addEventListener("click", openHow);
-howCloseBtn.addEventListener("click", closeHow);
-howBackdrop.addEventListener("click", closeHow);
-
-
-/* ========== SLOT WEBHOOK (DATE & DURATION) ========== */
-// базовый расчёт длительности, если n8n не вернёт своё значение
-collected.installDuration = Math.max(
-    1,
-    Math.ceil(collected.price / 800)
-);
-
+/* ========== 4. ЗАПРОС ДАТЫ УСТАНОВКИ (SLOT) ========== */
 async function findInstallSlot() {
     const installDateEl = document.getElementById("installDate");
     const durationEl = document.getElementById("durationBox");
+
+    // 1️⃣ считаем длительность ОДИН раз
+    collected.installDuration = Math.max(
+        1,
+        Math.ceil(collected.price / 800)
+    );
 
     try {
         const response = await fetch(
@@ -758,269 +757,226 @@ async function findInstallSlot() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-    zip: collected.zip,
-    area: collected.area,
-    design: collected.design,
-    variant: collected.variant,
-    prep: collected.prep,
-    finish: collected.price,
-    width: collected.width,
-    height: collected.height,
-    installDuration: collected.installDuration   // ← ДОБАВИТЬ
-})
+                    zip: collected.zip,
+                    area: collected.area,
+                    design: collected.design,
+                    variant: collected.variant,
+                    prep: collected.prep,
+                    price: collected.price,
+                    width: collected.width,
+                    height: collected.height,
+                    installDuration: collected.installDuration // ← ВАЖНО
+                })
             }
         );
 
         const data = await response.json();
-        console.log("Slot response:", data);
 
-collected.installDateISO =
-    data.installDateISO || data.dateISO || data.date || "";
-collected.installDateText =
-    data.installDateText || data.dateText || data.prettyDate || "";
+        collected.installDateISO = data.installDateISO || "";
+        collected.installDateText = data.installDateText || "";
 
-// если n8n вернул свою длительность – используем её,
-// если нет – оставляем то, что посчитали на фронте (price/800)
-const durationFromServer =
-    data.installDuration || data.durationDays || data.duration;
-
-if (durationFromServer) {
-    collected.installDuration = durationFromServer;
-}
-
-
-        if (collected.installDateText) {
-            installDateEl.textContent =
-                "Estimated installation date: " + collected.installDateText;
-        } else if (collected.installDateISO) {
-            installDateEl.textContent =
-                "Estimated installation date: " + collected.installDateISO;
-        } else {
-            installDateEl.textContent =
-                "Estimated installation date: Our manager will confirm by email.";
+        if (data.installDuration) {
+            collected.installDuration = data.installDuration;
         }
+
+        installDateEl.textContent =
+            "Estimated installation date: " +
+            (collected.installDateText || "Manager will confirm");
 
         durationEl.textContent =
             "Estimated installation duration: " +
             collected.installDuration +
             " day(s)";
+
     } catch (err) {
         console.error("Slot error:", err);
         installDateEl.textContent =
-            "Estimated installation date: Our manager will confirm by email.";
-        durationEl.textContent =
-            "Estimated installation duration: Will be clarified.";
+            "Estimated installation date: Manager will confirm";
     }
 }
 
-/* ========== CONTINUE YES/NO LOGIC ========== */
-const btnContinueYes = document.getElementById("btnContinueYes");
-const btnContinueNo = document.getElementById("btnContinueNo");
-const thankMessage = document.getElementById("thankMessage");
-const emailSection = document.getElementById("emailSection");
-const commSection = document.getElementById("commSection");
-const continueNote = document.getElementById("continueNote");
 
-btnContinueYes.onclick = () => {
-    btnContinueYes.classList.add("selected");
-    btnContinueNo.classList.remove("selected");
-    thankMessage.style.display = "none";
-
-    // Показать email секцию
-    emailSection.style.display = "block";
-    // Коммуникация появится чуть позже — после заполнения email
-};
-
-btnContinueNo.onclick = () => {
-    btnContinueNo.classList.add("selected");
-    btnContinueYes.classList.remove("selected");
-    emailSection.style.display = "none";
-    commSection.style.display = "none";
-    document.getElementById("invoiceSection").style.display = "none";
-
-    thankMessage.style.display = "block";
-    continueNote.style.display = "none";
-
-    // Показываем вопрос про другую стену
-    document.getElementById("anotherSection").style.display = "block";
-};
-
-/* ========== EMAIL & COMMUNICATION LOGIC ========== */
-const emailInput = document.getElementById("emailInput");
-const commEmail = document.getElementById("commEmail");
-const commPhone = document.getElementById("commPhone");
-const phoneWrapper = document.getElementById("phoneWrapper");
-const phoneInput = document.getElementById("phoneInput");
-const confirmCommBtn = document.getElementById("confirmCommBtn");
-const crmStatus = document.getElementById("crmStatus");
-
-let emailSelected = true;
-let phoneSelected = false;
+/* ========== 5. ОТПРАВКА В CRM ========== */
 let crmSent = false;
 
-/* Появление блока коммуникации после ввода нормального email */
-emailInput.addEventListener("input", () => {
-    const value = emailInput.value.trim();
-    collected.email = value;
-
-    // простая проверка вида
-    const looksValid = value.includes("@") && value.includes(".");
-    if (looksValid) {
-        commSection.style.display = "block";
-    } else {
-        commSection.style.display = "none";
-    }
-});
-
-/* Переключатели Email / Phone */
-commEmail.onclick = () => {
-    emailSelected = !emailSelected;
-    if (emailSelected) {
-        commEmail.classList.add("selected");
-    } else {
-        commEmail.classList.remove("selected");
-    }
-};
-
-commPhone.onclick = () => {
-    phoneSelected = !phoneSelected;
-    if (phoneSelected) {
-        commPhone.classList.add("selected");
-        phoneWrapper.style.display = "block";
-    } else {
-        commPhone.classList.remove("selected");
-        phoneWrapper.style.display = "none";
-    }
-};
-
-function validateComm() {
-    crmStatus.textContent = "";
-    crmStatus.className = "status-message";
-
-    if (!collected.email || !collected.email.includes("@")) {
-        crmStatus.textContent = "Please enter a valid email address.";
-        crmStatus.classList.add("status-error");
-        return false;
-    }
-
-    if (!emailSelected && !phoneSelected) {
-        crmStatus.textContent = "Please select at least one communication method.";
-        crmStatus.classList.add("status-error");
-        return false;
-    }
-
-    if (phoneSelected) {
-        const phoneVal = phoneInput.value.trim();
-        if (!phoneVal) {
-            crmStatus.textContent = "Please enter your phone number or disable phone communication.";
-            crmStatus.classList.add("status-error");
-            return false;
-        }
-        collected.phone = phoneVal;
-    } else {
-        collected.phone = "";
-    }
-
-    const methods = [];
-    if (emailSelected) methods.push("email");
-    if (phoneSelected) methods.push("phone");
-    collected.method = methods.join(", ");
-
-    return true;
-}
-
-/* ========== CRM WEBHOOK (ORDER) ========== */
 async function sendOrderToCRM(extraPayload = {}) {
+const nameVal = document.getElementById("nameInput").value.trim();
+    const emailVal = document.getElementById("emailInput").value.trim();
+    const phoneVal = document.getElementById("phoneInput").value.trim();
+
+    // СОБИРАЕМ ПАКЕТ ДАННЫХ
     const payload = {
-        ...collected,
+
+
+        orderId: collected.orderId, // ВОТ ЭТОЙ СТРОКИ У ВАС НЕ БЫЛО
+
+client_name: document.getElementById("nameInput").value.trim(),
+        design: collected.design,
+        variant: collected.variant,
+        prep: collected.prep,
+        finish: collected.finish,
+        paint_mode: collected.paint_mode,
+        color_primary: collected.color_primary,
+        color_secondary: collected.color_secondary,
+        area: collected.area,
+        width: collected.width,
+        height: collected.height,
+        zip: collected.zip,
+        price: collected.price,
+        email: emailVal,
+        phone: phoneVal,
+        method: collected.method,
+        installDateISO: collected.installDateISO,
+        installDateText: collected.installDateText,
+        installDuration: collected.installDuration,
+        source: "accentwall_calculator",
         ...extraPayload
     };
 
+    console.log("🚀 FINAL PAYLOAD:", payload);
+
     try {
-        const response = await fetch(
-            "https://wallartacwllc.app.n8n.cloud/webhook/accentwall/order",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            }
-        );
+        const response = await fetch("https://wallartacwllc.app.n8n.cloud/webhook/accentwall/order", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
 
-        const text = await response.text();
-        console.log("CRM response:", text);
+        if (!response.ok) throw new Error("Server error");
 
-        crmStatus.textContent = "Your request has been sent. We’ll be in touch soon.";
-        crmStatus.classList.remove("status-error");
-        crmStatus.classList.add("status-ok");
-
+        crmStatus.textContent = "Your request has been sent! We'll contact you soon.";
+        crmStatus.className = "status-message status-ok";
         crmSent = true;
-// EXTRA MESSAGE FOR USER
-const extraMsg = document.createElement("div");
-extraMsg.style.marginTop = "12px";
-extraMsg.style.fontSize = "20px";
-extraMsg.style.fontWeight = "700";
-extraMsg.style.textAlign = "center";
-extraMsg.style.color = "#2d7a2d";
-extraMsg.textContent = "Our manager will contact you as soon as possible.";
 
-crmStatus.insertAdjacentElement("afterend", extraMsg);
-
-        // показать кнопку инвойса и вопрос про другую стену
         document.getElementById("invoiceSection").style.display = "block";
         document.getElementById("anotherSection").style.display = "block";
     } catch (err) {
-        console.error("CRM error:", err);
-        crmStatus.textContent = "Something went wrong. Please try again later.";
-        crmStatus.classList.add("status-error");
+        console.error("CRM Error:", err);
+        crmStatus.textContent = "Error sending. Please try again.";
+        crmStatus.className = "status-message status-error";
     }
 }
 
-/* Подтверждение метода коммуникации → отправка в CRM */
-confirmCommBtn.onclick = () => {
-    if (!validateComm()) return;
-    if (crmSent) {
-        crmStatus.textContent = "Your preferences are already saved.";
-        crmStatus.classList.remove("status-error");
-        crmStatus.classList.add("status-ok");
-        return;
+/* ========== 6. ЛОГИКА КНОПОК И ПОЛЕЙ ========== */
+const emailInput = document.getElementById("emailInput");
+const commSection = document.getElementById("commSection");
+const phoneWrapper = document.getElementById("phoneWrapper");
+const nameInput = document.getElementById("nameInput");
+const confirmBtn = document.getElementById("confirmCommBtn");
+const crmStatus = document.getElementById("crmStatus");
+
+
+
+// Переключатели
+document.getElementById("btnContinueYes").onclick = () => {
+    document.getElementById("btnContinueYes").classList.add("selected");
+    document.getElementById("btnContinueNo").classList.remove("selected");
+    document.getElementById("emailSection").style.display = "block";
+};
+
+document.getElementById("btnContinueNo").onclick = () => {
+    document.getElementById("btnContinueNo").classList.add("selected");
+    document.getElementById("btnContinueYes").classList.remove("selected");
+    document.getElementById("thankMessage").style.display = "block";
+    document.getElementById("anotherSection").style.display = "block";
+};
+
+emailInput.addEventListener("input", () => {
+    if (emailInput.value.includes("@") && emailInput.value.includes(".")) {
+        commSection.style.display = "block";
     }
-    sendOrderToCRM({ source: "accentwall_calculator" });
-};
+});
 
-/* Кнопка отправить инвойс на email (повторная отправка с флагом) */
-const sendInvoiceBtn = document.getElementById("sendInvoiceBtn");
-sendInvoiceBtn.onclick = () => {
-    if (!collected.email) {
-        crmStatus.textContent = "Please enter your email first.";
-        crmStatus.classList.add("status-error");
-        return;
+nameInput.addEventListener("input", () => {
+    if (nameInput.value.trim().length > 0) {
+        confirmBtn.style.display = "inline-flex";
+    } else {
+        confirmBtn.style.display = "none";
     }
-    sendOrderToCRM({ sendInvoiceOnly: true });
+});
+
+
+let emailActive = true;
+let phoneActive = false;
+
+document.getElementById("commEmail").onclick = function() {
+    emailActive = !emailActive;
+    this.classList.toggle("selected", emailActive);
 };
 
-/* ========== ANOTHER WALL LOGIC ========== */
-const btnAnotherYes = document.getElementById("btnAnotherYes");
-const btnAnotherNo = document.getElementById("btnAnotherNo");
-
-btnAnotherYes.onclick = () => {
-    // на твой выбор: index.html / step1.html / step2.html
-    window.location.href = "index.html";
+document.getElementById("commPhone").onclick = function() {
+    phoneActive = !phoneActive;
+    this.classList.toggle("selected", phoneActive);
+    phoneWrapper.style.display = phoneActive ? "block" : "none";
 };
 
-btnAnotherNo.onclick = () => {
-    btnAnotherNo.classList.add("selected");
-    btnAnotherYes.classList.remove("selected");
-    // просто сообщение, оставить на странице
-    crmStatus.textContent = "Thank you! We’ve saved your project details.";
-    crmStatus.classList.remove("status-error");
-    crmStatus.classList.add("status-ok");
+document.getElementById("confirmCommBtn").onclick = () => {
+    const methods = [];
+    if (emailActive) methods.push("email");
+    if (phoneActive) methods.push("phone");
+    collected.method = methods.join(", ");
+
+    // 🔑 ВОТ ЭТОГО НЕ БЫЛО
+    collected.client_name = document.getElementById("nameInput").value.trim();
+
+    if (crmSent) return;
+    sendOrderToCRM();
 };
 
-/* ========== INIT ON LOAD ========== */
+
+document.getElementById("sendInvoiceBtn").onclick = async () => {
+const payload = {
+  orderId: collected.orderId,
+  // 🔑 ВОТ ЭТА СТРОКА
+  client_name: collected.client_name,
+  email: document.getElementById("emailInput").value.trim(),
+
+  design: collected.design,
+  variant: collected.variant,
+  prep: collected.prep,
+
+  // 🔑 ВАЖНО: именно эти поля нужны для PDF
+  paint_mode: collected.paint_mode,
+  color_primary: collected.color_primary,
+  color_secondary: collected.color_secondary,
+
+  area: collected.area,
+  width: collected.width,
+  height: collected.height,
+  zip: collected.zip,
+  price: collected.price,
+
+  installDateText: collected.installDateText,
+  installDuration: collected.installDuration,
+
+  source: "accentwall_calculator"
+};
+
+
+    console.log("📧 INVOICE PAYLOAD:", payload);
+
+    await fetch(
+        "https://wallartacwllc.app.n8n.cloud/webhook/accentwall/estimate",
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        }
+    );
+document.getElementById("invoiceStatus").style.display = "block";
+document.getElementById("sendInvoiceBtn").classList.add("disabled");
+
+   };
+
+
+document.getElementById("btnAnotherYes").onclick = () => { window.location.href = "index.html"; };
+document.getElementById("btnAnotherNo").onclick = () => {
+    document.getElementById("crmStatus").textContent = "Thank you! Project details saved.";
+};
+
+/* ЗАПУСК */
 window.addEventListener("DOMContentLoaded", () => {
     initSummary();
-
-
     findInstallSlot();
 });
 </script>

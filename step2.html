@@ -350,10 +350,20 @@ function selectDesign(e, designKey) {
 
     // CUSTOM DESIGN — без автоцены
     if (designKey === "custom") {
-        document.getElementById("bottomPrice").textContent =
-            "Custom pricing";
-        return;
-    }
+    document.getElementById("bottomPrice").textContent = "Custom pricing";
+
+    // сохранить выбор
+    localStorage.setItem("selectedDesign", "custom");
+    localStorage.removeItem("currentPrice");
+
+    // переход на шаг 7 (кастом)
+    nextBtn.onclick = () => {
+        window.location.href = "step7.html";
+    };
+
+    return;
+}
+
 
     /* ---------- PRICING FROM CONFIG ---------- */
     const baseRate = DESIGN_BASE_RATE[designKey];
